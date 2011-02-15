@@ -1,0 +1,227 @@
+<?php
+// $Id$
+/**
+ * @file
+ * OSInet Quality Assurance module for Drupal
+ *
+ * @copyright Copyright (C) 2005-2011 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
+ *
+ * @since DRUPAL-4-6
+ *
+ * @license Licensed under the disjunction of the CeCILL, version 2 and General Public License version 2 and later
+ *
+ * License note: QA is distributed by OSInet to its customers under the
+ * CeCILL 2.0 license. OSInet support services only apply to the module
+ * when distributed by OSInet, not by any third-party further down the
+ * distribution chain.
+ *
+ * If you obtained QA from drupal.org, that site received it under the
+ * GPLv2 license and can therefore distribute it under the GPLv2, and
+ * so can you and just anyone down the chain as long as the GPLv2 terms
+ * are abided by, the module distributor in that case being the
+ * drupal.org organization or the downstream distributor, not OSInet.
+ */
+
+/**
+ * SAME is an OSInet library class, which other modules may have imported
+ */
+if (!class_exists('Same')) {
+  /**
+   * A lifetime class
+   *
+   * Properties are: Start, Access, Modify, End
+   */
+  class Same {
+    public $s;
+    public $a;
+    public $m;
+    public $e;
+
+    /**
+     * Constructor
+     *
+     * S.A.M. default to current time, but E has no default.
+     *
+     * @param int $s
+     * @param int $a
+     * @param int $m
+     * @param int $e
+     */
+    function __construct($s = NULL, $a = NULL, $m = NULL, $e = NULL) {
+      $now = time();
+      foreach (array('s', 'a', 'm') as $ts) {
+        $this->$ts = isset($$ts) ? $$ts : $now;
+      }
+    }
+
+    public function access($now = NULL) {
+      $this->a = isset($now) ? $now : time();
+    }
+
+    public function modify($now = NULL) {
+      if (!isset($now)) {
+        $now = time();
+      }
+      $this->access($now);
+      $this->m = $now;
+    }
+
+    public function end($now = NULL) {
+      if (!isset($now)) {
+        $now = time();
+      }
+      $this->modify($now);
+      $this->e = $now;
+    }
+  }
+}
+
+abstract class QaExportable {
+  /**
+   * Machine name
+   *
+   * @var string
+   */
+  public $name;
+
+  /**
+   * Description: translatable
+   *
+   * @var string
+   */
+  public $description;
+
+  /**
+   * Human readable name, used for titles. Translatable.
+   *
+   * @var string
+   */
+  public $title;
+
+}
+
+/**
+ * An instantiable QaExportable
+ */
+class QaPackage extends QaExportable {
+
+  public static $instances = array();
+
+  function __construct($name, $title, $description = NULL) {
+    $this->name = $name;
+    $this->title = $title;
+    $this->description = $description;
+    self::$instances[$name] = $this;
+  }
+}
+
+class QaControl extends QaPackage {
+  /**
+   * The package to which the control belongs
+   *
+   * @var QaPackage
+   */
+  public $package;
+
+  /**
+   * An options hash
+   *
+   * @var array
+   */
+  public $options;
+
+  /**
+   * The hash of passes for that control.
+   *
+   * @var array
+   */
+  public $passes;
+
+  /**
+   * Run the control.
+   *
+   * @return int
+   *   - 0: failure
+   *   - 1: success
+   */
+  public function run() {
+    $key = uniqid(variable_get('site_key', NULL));
+    $pass = new QaPass($this);
+    $this->passes[$key] = $pass;
+    return $pass;
+  }
+
+}
+
+/**
+ * A control pass.
+ */
+class QaPass {
+  /**
+   * The control of which this is a pass
+   *
+   * @var QaControl
+   */
+  public $control;
+
+  /**
+   * The user who ran the pass.
+   *
+   * This is normally a stdClass with a $uid public member.
+   *
+   * @var object
+   */
+  public $account;
+
+  /**
+   * The pass lifecycle
+   *
+   * @var Same
+   */
+  public $life;
+
+  /**
+   * Success or failure
+   *
+   * @var int
+   *   - NULL: undefined
+   *   - 0: failure
+   *   - 1: success
+   */
+  public $status;
+
+  /**
+   * Render array for the results
+   *
+   * @param array
+   */
+  public $result;
+
+  function __construct($control) {
+    $this->life = new Same();
+    $this->status = NULL;
+    $this->control = $control;
+    $this->account = $GLOBALS['user'];
+    $this->result = array();
+  }
+
+  /**
+   * Record results from one of the checks in a control pass
+   *
+   * @param array $check
+   *   - status: 0 or 1
+   *   - result: render array
+   *
+   * @return void
+   */
+  function record($check) {
+    $this->result[] = $check['result'];
+    if (!$check['status']) {
+      $this->status = 0;
+    }
+    elseif (!isset($this->status)) {
+      $this->status = 1;
+    }
+    $this->life->modify();
+  }
+}

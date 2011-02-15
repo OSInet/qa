@@ -1,0 +1,15 @@
+; $Id$
+;
+; @file
+; Manifest for the OSInet Quality Assurance module
+;
+
+name = QA
+description = Quality Assurance framework and built-in controls
+package = Quality
+dependencies[] = autoload
+core = 6.x
+
+files[] = controls/qa_views.classes.inc
+
+; recommends[] = 
