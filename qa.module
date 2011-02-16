@@ -312,8 +312,61 @@ function qa_menu() {
     'page arguments'   => array('qa_report_form'),
     'access arguments' => 0, // make sure only user 1 can run this
   );
+  $items['admin/reports/qa/results'] = array(
+    'title'            => 'Quality Assurance results',
+    'page callback'    => 'qa_report_results',
+    'page arguments'   => array(),
+    'access arguments' => 0, // make sure only user 1 can run this
+  );
 
   return $items;
+}
+
+function qa_report_finished($success, $results, $operations) {
+  unset($results['#message']);
+  if ($success) {
+    $message = format_plural(count($results), 'One control pass ran.', '@count control passes ran.');
+  }
+  else {
+    $message = t('Finished with an error.');
+  }
+  drupal_set_message($message);
+  $_SESSION['qa_results'] = $results;
+  drupal_goto('admin/reports/qa/results');
+}
+
+/**
+ * Results page for QA Controls batch.
+ *
+ * @link http://www.php.net/manual/fr/function.unserialize.php @endlink
+ */
+function qa_report_results() {
+  if (empty($_SESSION['qa_results'])) {
+    drupal_goto('admin/reports/qa');
+  }
+  // Work around incomplete classes
+  $results = unserialize(serialize($_SESSION['qa_results']));
+
+  $header = array(
+    t('Control'),
+    t('Status'),
+    t('Results'),
+  );
+  $data = array();
+  foreach ($results as $class_name => $pass) {
+    $control = $pass->control;
+    $data[] = array(
+      $control->title,
+      $pass->status
+        ? theme('image', 'misc/watchdog-ok.png',    t('OK'))
+        : theme('image', 'misc/watchdog-error.png', t('Error')),
+      $pass->result,
+    );
+  }
+
+  $ret = theme('table', $header, $data);
+  // unset($_SESSION['qa_results']);
+  return $ret;
 }
 
 /**
@@ -391,7 +444,37 @@ function qa_report_form_submit($form, $form_state) {
       $_SESSION[$item] = $value;
     }
   }
-  drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
+  // drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
+  $batch = array(
+    'operations'       => array(),
+    'title'            => t('QA Controls running'),
+    'init_message'     => t('QA Controls initializing'),
+    // 'progress_message' => t('current: @current, Remaining: @remaining, Total: @total'),
+    'error_message'    => t('Error in QA Control'),
+    'finished'         => 'qa_report_finished',
+    // 'file'             => '', // only if outside module file
+  );
+
+  foreach ($controls as $item => $value) {
+    $batch['operations'][] = array('qa_report_run_pass', array($item));
+  }
+  batch_set($batch);
+}
+
+/**
+ * Batch progress step.
+ *
+ * @return void
+ */
+function qa_report_run_pass($class_name, &$context) {
+  $control = call_user_func(array($class_name, 'getInstance'));
+  $pass = $control->run();
+  if (!$pass->status) {
+    $context['success'] = FALSE;
+  }
+  $context['results']['#message'][] = t('Control @name ran', array('@name' => $class_name));
+  $context['message'] = theme('item_list', $context['results']['#message']);
+  $context['results'][$class_name] = $pass;
 }
 
 /**

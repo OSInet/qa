@@ -108,5 +108,17 @@ class QaControlViewsOverrides extends QaControl {
       $pass->record($this->checkViewPhp($view));
     }
     $pass->life->end();
+
+    // Prepare for theming
+    $result = array();
+    foreach ($pass->result as $view_name => $view_report) {
+      $result[] = t('!view: @type', array(
+        '!view' => $view_report[0], // Build safe in self::checkViewPhp
+        '@type' => $view_report[1],
+      ));
+    }
+    $result = theme('item_list', $result);
+    $pass->result = $result;
+    return $pass;
   }
 }
