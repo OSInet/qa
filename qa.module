@@ -98,35 +98,33 @@ abstract class QaExportable {
    */
   public $title;
 
+  /**
+   * Singleton protected constructor
+   *
+   * @param string $name
+   */
+  protected function __construct() {
+    $this->name = get_called_class();
+  }
 }
 
 /**
  * An instantiable QaExportable
  */
-class QaPackage extends QaExportable {
+abstract class QaPackage extends QaExportable {
 
-//  public static $instances = array();
-//
-//  protected function __construct() {
-//    $this->name = $name;
-//    $this->title = $title;
-//    $this->description = $description;
-//  }
-//
-//  public static function getInstance($name) {
-//    if (!isset(self::$instances[$name])) {
-//      $instances[$name] = new $name();
-//    }
-//    return $instances[$name];
-//  }
+  protected static $instances = array();
 
-  public static function getControls() {
-    $ret = QaControl::getControls(get_called_class());
-    return $ret;
+  public static function getInstance() {
+    $name = get_called_class();
+    if (!isset(self::$instances[$name])) {
+      self::$instances[$name] = new $name();;
+    }
+    return self::$instances[$name];
   }
 }
 
-class QaControl {
+abstract class QaControl extends QaExportable {
 
   /**
    * An options hash
@@ -156,19 +154,19 @@ class QaControl {
    */
   protected static $packages = array();
 
-  /**
-   * Singleton protected constructor
-   *
-   * @param string $name
-   */
-  protected function __construct() {}
-
   public static function getInstance() {
     $name = get_called_class();
     if (!isset(self::$instances[$name])) {
       $instance = new $name();
       self::$instances[$name] = $instance;
-      self::$packages[$instance->package_name][] = $instance;
+      if (!isset(self::$packages[$instance->package_name])) {
+        $package = new $instance->package_name();
+        self::$packages[get_class($package)] = array(
+          'package' => $package,
+          'controls' => array(),
+        );
+      }
+      self::$packages[$instance->package_name]['controls'][$instance->name] = $instance;
     }
     return self::$instances[$name];
   }
@@ -285,16 +283,37 @@ class QaPass {
   }
 }
 
-function _qa_get_controls() {
+function qa_menu() {
+  $items = array();
+  $items['admin/settings/qa'] = array(
+    'title'            => 'Quality Assurance',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('qa_settings'),
+    'access arguments' => 0, // make sure only user 1 can run this
+  );
+
+  return $items;
+}
+
+/**
+ * Implement the former hook_settings().
+ */
+function qa_settings($form_state) {
+
+  $form = array();
+  $controls = _qa_setup(); // initialize list
+  $packages = QaControl::getControls();
+  dvm($packages);
+  return array();
+}
+
+function _qa_setup() {
   $controls = array(
     'QaControlViewsPhp',
   );
 
-  $ret = array();
   // Instantiate classes to register them and their packages
   foreach ($controls as $name) {
-    $ret[$name] = call_user_func(array($name, 'getInstance'));
+    call_user_func(array($name, 'getInstance'));
   }
-
-  return $ret;
 }

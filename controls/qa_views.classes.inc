@@ -23,10 +23,11 @@
  */
 
 class QaPackageViews extends QaPackage {
-//    $this->name = 'views_php';
-//    $this->title = t('Check for PHP code within site views');
-//    $this->description = t('Check within views definitions to make sure they do not contain embedded PHP, which is both a security risk and a performance issue.');
-
+  function __construct() {
+    parent::__construct();
+    $this->title = t('Views quality controls');
+    $this->description = t('Look for overridden views and views containing embedded PHP');
+  }
 }
 
 /**
@@ -42,7 +43,10 @@ class QaControlViewsPhp extends QaControl {
   public $package_name;
 
   protected function __construct() {
+    parent::__construct();
     $this->package_name = 'QaPackageViews';
+    $this->title = t('Check for PHP code within site views');
+    $this->description = t('Check within views definitions to make sure they do not contain embedded PHP, which is both a security risk and a performance issue.');
     parent::__construct();
   }
 
