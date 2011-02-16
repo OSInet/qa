@@ -285,10 +285,10 @@ class QaPass {
 
 function qa_menu() {
   $items = array();
-  $items['admin/settings/qa'] = array(
+  $items['admin/reports/qa'] = array(
     'title'            => 'Quality Assurance',
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('qa_settings'),
+    'page arguments'   => array('qa_report_form'),
     'access arguments' => 0, // make sure only user 1 can run this
   );
 
@@ -296,17 +296,70 @@ function qa_menu() {
 }
 
 /**
- * Implement the former hook_settings().
+ * Form builder for QA packages/controls selection form.
+ *
+ * @return array
  */
-function qa_settings($form_state) {
+function qa_report_form($form_state) {
 
   $form = array();
   $controls = _qa_setup(); // initialize list
   $packages = QaControl::getControls();
-  dvm($packages);
-  return array();
+
+  foreach ($packages as $package_name => $package_info) {
+    $collapsed = TRUE;
+    $form[$package_name] = array(
+      '#type' => 'fieldset',
+      '#title' => $package_info['package']->title,
+      '#description' => $package_info['package']->description,
+      '#collapsible' => TRUE,
+    );
+    foreach ($package_info['controls'] as $control_name => $control) {
+      $default_value = $_SESSION[$control_name];
+      if ($default_value) {
+        $collapsed = FALSE;
+      }
+      $form[$package_name][$control_name] = array(
+        '#type'          => 'checkbox',
+        '#default_value' => $default_value,
+        '#title'         => $control->title,
+        '#description'   => $control->description,
+      );
+    }
+    $form[$package_name]['#collapsed'] = $collapsed;
+  }
+
+  $form['submit'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Run controls'),
+  );
+  return $form;
 }
 
+/**
+ * Submit handler for QA packages/controls selection form
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function qa_report_form_submit($form, $form_state) {
+  $controls = array();
+  foreach ($form_state['values'] as $item => $value) {
+    if (class_exists($item) && is_subclass_of($item, 'QaControl')) {
+      if ($value) {
+        $controls[$item] = $value;
+      }
+      $_SESSION[$item] = $value;
+    }
+  }
+  drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
+}
+
+/**
+ * Initialize the object set.
+ *
+ * @return void
+ */
 function _qa_setup() {
   $controls = array(
     'QaControlViewsPhp',
