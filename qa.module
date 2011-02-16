@@ -307,19 +307,28 @@ class QaPass {
 function qa_menu() {
   $items = array();
   $items['admin/reports/qa'] = array(
-    'title'            => 'Quality Assurance',
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('qa_report_form'),
-    'access arguments' => 0, // make sure only user 1 can run this
+    'title'           => 'Quality Assurance',
+    'page callback'   => 'drupal_get_form',
+    'page arguments'  => array('qa_report_form'),
+    'access callback' => 'qa_report_access',
   );
   $items['admin/reports/qa/results'] = array(
-    'title'            => 'Quality Assurance results',
-    'page callback'    => 'qa_report_results',
-    'page arguments'   => array(),
-    'access arguments' => 0, // make sure only user 1 can run this
+    'title'           => 'Quality Assurance results',
+    'page callback'   => 'qa_report_results',
+    'page arguments'  => array(),
+    'access callback' => 'qa_report_access',
+    'type'            => MENU_CALLBACK,
   );
 
   return $items;
+}
+
+/**
+ * Access callback for QA reports.
+ */
+function qa_report_access() {
+  global $user;
+  return isset($user->uid) && $user->uid == 1;
 }
 
 function qa_report_finished($success, $results, $operations) {
