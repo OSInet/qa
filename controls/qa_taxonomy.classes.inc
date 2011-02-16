@@ -40,7 +40,6 @@ class QaControlTaxonomyFreetagging extends QaControl {
     $this->package_name = 'QaPackageTaxonomy';
     $this->title = t('Unused freetagging terms');
     $this->description = t('Unused freetagging terms mean useless volume. Removing them helps makin term autocompletes more relevant.');
-    parent::__construct();
   }
 
   static function getDependencies() {
@@ -49,13 +48,56 @@ class QaControlTaxonomyFreetagging extends QaControl {
     return $ret;
   }
 
+  function checkTags($vocabulary) {
+    $sq = <<<EOT
+SELECT td.tid
+FROM {term_data} td
+  LEFT JOIN {term_node} tn ON td.tid = tn.tid
+WHERE
+  td.vid = %d AND tn.nid IS NULL
+EOT;
+    // no db_rewrite_sql(): we are checking the whole database
+    $q = db_query($sq, $vocabulary->vid);
+    $result = array(
+      'vocabulary' => $vocabulary,
+      'terms' => array(),
+    );
+    while ($o = db_fetch_object($q)) {
+      $term = taxonomy_get_term($o->tid); // has an internal cache, so we may loop
+      $result['terms'][$term->tid] = l($term->name, 'admin/content/taxonomy/edit/term/'. $term->tid, array(
+        'query' => array('destination' => 'admin/reports/qa/result'),
+      ));
+    }
+    return array(
+      'name'   => $vocabulary->name,
+      'status' => empty($result['terms']) ? 1 : 0,
+      'result' => $result,
+    );
+  }
+
   function run() {
     $pass = parent::run();
-    $views = views_get_all_views(TRUE);
-    foreach ($views as $view) {
-      $pass->record($this->checkViewPhp($view));
+    $vocabularies = taxonomy_get_vocabularies();
+    foreach ($vocabularies as $vid => $vocabulary) {
+    // dsm($vocabulary);
+      if ($vocabulary->tags) {
+        $pass->record($this->checkTags($vocabulary));
+      }
     }
     $pass->life->end();
+
+    // Prepare for theming
+    $result = '';
+    foreach ($pass->result as $vocabulary_name => $info) {
+      $vocabulary_link = l($vocabulary_name, 'admin/content/taxonomy/'. $info['vocabulary']->vid);
+      $result[] = t('!link: !terms', array(
+        '!link' => $vocabulary_link,
+        '!terms' => implode(', ', $info['terms']),
+      ));
+    }
+    $result = theme('item_list', $result);
+    $pass->result = $result;
+    return $pass;
   }
 }
 
@@ -66,7 +108,6 @@ class QaControlTaxonomyOrphans extends QaControl {
     $this->package_name = 'QaPackageTaxonomy';
     $this->title = t('Inconsistent node tagging');
     $this->description = t('Check for term_node entries pointing to a missing node or term. These should never happen, and should be removed when they do.');
-    parent::__construct();
   }
 
   static function getDependencies() {

@@ -9,6 +9,7 @@ description = Quality Assurance framework and built-in controls
 package = Quality
 dependencies[] = autoload
 core = 6.x
+php = 5.3
 
 files[] = controls/qa_references.classes.inc
 files[] = controls/qa_system.classes.inc
