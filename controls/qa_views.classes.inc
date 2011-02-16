@@ -80,5 +80,33 @@ class QaControlViewsOverrides extends QaControl {
     return $ret;
   }
 
-  function run() {}
+  function checkViewPhp($view) {
+    $status = $view->type == t('Default') ? 1 : 0;
+    if (!$status) {
+      $name = empty($view->human_name) ? $view->name : $view->human_name;
+      $result = array(
+      module_exists('views_ui')
+          ? l($name, 'admin/build/views/edit/'. $view->name)
+          : $name,
+        $view->type);
+    }
+    else {
+      $result = NULL;
+    }
+    $ret = array(
+      'name'   => $view->name,
+      'status' => $status,
+      'result' => $result,
+    );
+    return $ret;
+  }
+
+  function run() {
+    $pass = parent::run();
+    $views = views_get_all_views(TRUE);
+    foreach ($views as $view) {
+      $pass->record($this->checkViewPhp($view));
+    }
+    $pass->life->end();
+  }
 }

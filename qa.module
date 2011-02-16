@@ -288,9 +288,14 @@ class QaPass {
    * @return void
    */
   function record($check) {
-    $this->result[] = $check['result'];
     if (!$check['status']) {
       $this->status = 0;
+      if (isset($check['name'])) {
+        $this->result[$check['name']] = $check['result'];
+      }
+      else {
+        $this->result[] = $check['result'];
+      }
     }
     elseif (!isset($this->status)) {
       $this->status = 1;
