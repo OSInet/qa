@@ -127,6 +127,13 @@ abstract class QaPackage extends QaExportable {
 abstract class QaControl extends QaExportable {
 
   /**
+   * The package to which the control belongs
+   *
+   * @var string
+   */
+  public $package_name;
+
+  /**
    * An options hash
    *
    * @var array
@@ -153,6 +160,15 @@ abstract class QaControl extends QaExportable {
    * @var array
    */
   protected static $packages = array();
+
+  /**
+   * Return an array of module dependencies.
+   *
+   * @return array
+   */
+  public static function getDependencies() {
+    return array();
+  }
 
   public static function getInstance() {
     $name = get_called_class();
@@ -319,11 +335,29 @@ function qa_report_form($form_state) {
       if ($default_value) {
         $collapsed = FALSE;
       }
+
+      $deps = array();
+      $met = TRUE;
+      foreach ($control->getDependencies() as $dep_name) {
+        if (module_exists($dep_name)) {
+          $deps[] = t('@module (<span class="admin-enabled">available</span>)', array('@module' => $dep_name));
+        }
+        else {
+          $deps[] = t('@module (<span class="admin-disabled">unavailable</span>)', array('@module' => $dep_name));
+          $met = FALSE;
+        }
+      }
       $form[$package_name][$control_name] = array(
         '#type'          => 'checkbox',
-        '#default_value' => $default_value,
+        '#default_value' => $met ? $default_value : 0,
         '#title'         => $control->title,
         '#description'   => $control->description,
+        '#disabled'      => !$met,
+      );
+      $form[$package_name][$control_name .'-dependencies'] = array(
+        '#value' => t('Depends on: !dependencies', array('!dependencies' => implode(', ', $deps))),
+        '#prefix' => '<div class="admin-dependencies">',
+        '#suffix' => '</div>',
       );
     }
     $form[$package_name]['#collapsed'] = $collapsed;
@@ -362,7 +396,12 @@ function qa_report_form_submit($form, $form_state) {
  */
 function _qa_setup() {
   $controls = array(
+    'QaControlReferences',
+    'QaControlSystem',
+    'QaControlTaxonomyFreetagging',
+    'QaControlTaxonomyOrphans',
     'QaControlViewsPhp',
+    'QaControlViewsOverrides',
   );
 
   // Instantiate classes to register them and their packages

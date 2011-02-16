@@ -2,11 +2,11 @@
 // $Id$
 /**
  * @file
- * OSInet QA Plugin for Views 6.3
+ * OSInet QA Plugin for Taxonomy 6.x
  *
- * @copyright Copyright (C) 2011 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
+ * @copyright Copyright (C) 2006-2011 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
  *
- * @since DRUPAL-6
+ * @since DRUPAL-4.7
  *
  * @license Licensed under the disjunction of the CeCILL, version 2 and General Public License version 2 and later
  *
@@ -22,35 +22,30 @@
  * drupal.org organization or the downstream distributor, not OSInet.
  */
 
-class QaPackageViews extends QaPackage {
+class QaPackageTaxonomy extends QaPackage {
   function __construct() {
     parent::__construct();
-    $this->title = t('Views quality controls');
-    $this->description = t('Look for overridden views and views containing embedded PHP');
+    $this->title = t('Taxonomy quality controls');
+    $this->description = t('Look for orphan freetags, and inconsistent node tagging');
   }
 }
 
 /**
  * Find views containing PHP code
  */
-class QaControlViewsPhp extends QaControl {
+class QaControlTaxonomyFreetagging extends QaControl {
 
   protected function __construct() {
     parent::__construct();
-    $this->package_name = 'QaPackageViews';
-    $this->title = t('PHP code within site views');
-    $this->description = t('Is there any embedded PHP within views and display definitions ? This is both a security risk and a performance issue.');
+    $this->package_name = 'QaPackageTaxonomy';
+    $this->title = t('Unused freetagging terms');
+    $this->description = t('Unused freetagging terms mean useless volume. Removing them helps makin term autocompletes more relevant.');
     parent::__construct();
-  }
-
-  function checkViewPhp($view) {
-    $ret = array('status' => 1, 'result' => array());
-    return $ret;
   }
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
+    $ret = array_merge($ret, array('taxonomy'));
     return $ret;
   }
 
@@ -64,19 +59,19 @@ class QaControlViewsPhp extends QaControl {
   }
 }
 
-class QaControlViewsOverrides extends QaControl {
+class QaControlTaxonomyOrphans extends QaControl {
 
   protected function __construct() {
     parent::__construct();
-    $this->package_name = 'QaPackageViews';
-    $this->title = t('Overridden views');
-    $this->description = t('Have any views been overridden ? This is a performance and change management issue.');
+    $this->package_name = 'QaPackageTaxonomy';
+    $this->title = t('Inconsistent node tagging');
+    $this->description = t('Check for term_node entries pointing to a missing node or term. These should never happen, and should be removed when they do.');
     parent::__construct();
   }
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
+    $ret = array_merge($ret, array('taxonomy'));
     return $ret;
   }
 

@@ -10,6 +10,9 @@ package = Quality
 dependencies[] = autoload
 core = 6.x
 
+files[] = controls/qa_references.classes.inc
+files[] = controls/qa_system.classes.inc
+files[] = controls/qa_taxonomy.classes.inc
 files[] = controls/qa_views.classes.inc
 
 ; recommends[] = 

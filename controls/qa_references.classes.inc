@@ -22,63 +22,48 @@
  * drupal.org organization or the downstream distributor, not OSInet.
  */
 
-class QaPackageViews extends QaPackage {
+class QaPackageReferences extends QaPackage {
   function __construct() {
     parent::__construct();
-    $this->title = t('Views quality controls');
-    $this->description = t('Look for overridden views and views containing embedded PHP');
+    $this->title = t('Node/User References');
+    $this->description = t('Look for references to missing nodes or users');
   }
 }
 
 /**
  * Find views containing PHP code
  */
-class QaControlViewsPhp extends QaControl {
+class QaControlReferences extends QaControl {
 
   protected function __construct() {
     parent::__construct();
-    $this->package_name = 'QaPackageViews';
-    $this->title = t('PHP code within site views');
-    $this->description = t('Is there any embedded PHP within views and display definitions ? This is both a security risk and a performance issue.');
+    $this->package_name = 'QaPackageReferences';
+    $this->title = t('References to missing nodes or users');
+    $this->description = t('Missing nodes or references mean broken links and a bad user experience. These should usually be edited.');
     parent::__construct();
   }
 
-  function checkViewPhp($view) {
+  function checkNodes() {
+    $ret = array('status' => 1, 'result' => array());
+    return $ret;
+  }
+
+  function checkUsers() {
     $ret = array('status' => 1, 'result' => array());
     return $ret;
   }
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
+    $ret = array_merge($ret, array('content', 'nodereference', 'userreference'));
     return $ret;
   }
 
   function run() {
     $pass = parent::run();
-    $views = views_get_all_views(TRUE);
-    foreach ($views as $view) {
-      $pass->record($this->checkViewPhp($view));
-    }
+    $pass->record($this->checkNodes());
+    $pass->life->modify();
+    $pass->record($this->checkUsers());
     $pass->life->end();
   }
-}
-
-class QaControlViewsOverrides extends QaControl {
-
-  protected function __construct() {
-    parent::__construct();
-    $this->package_name = 'QaPackageViews';
-    $this->title = t('Overridden views');
-    $this->description = t('Have any views been overridden ? This is a performance and change management issue.');
-    parent::__construct();
-  }
-
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
-    return $ret;
-  }
-
-  function run() {}
 }
