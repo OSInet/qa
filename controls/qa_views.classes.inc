@@ -22,16 +22,28 @@
  * drupal.org organization or the downstream distributor, not OSInet.
  */
 
+class QaPackageViews extends QaPackage {
+//    $this->name = 'views_php';
+//    $this->title = t('Check for PHP code within site views');
+//    $this->description = t('Check within views definitions to make sure they do not contain embedded PHP, which is both a security risk and a performance issue.');
+
+}
+
 /**
  * Find views containing PHP code
  */
-class QaViewsPhp extends QaControl {
+class QaControlViewsPhp extends QaControl {
 
-  function __construct() {
-    $this->package = new QaPackage('qa_views', t('Views tests'));
-    $this->name = 'views_php';
-    $this->title = t('Check for PHP code within site views');
-    $this->description = t('Check within views definitions to make sure they do not contain embedded PHP, which is both a security risk and a performance issue.');
+  /**
+   * The package to which the control belongs
+   *
+   * @var string
+   */
+  public $package_name;
+
+  protected function __construct() {
+    $this->package_name = 'QaPackageViews';
+    parent::__construct();
   }
 
   function checkViewPhp($view) {

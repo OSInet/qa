@@ -105,23 +105,28 @@ abstract class QaExportable {
  */
 class QaPackage extends QaExportable {
 
-  public static $instances = array();
+//  public static $instances = array();
+//
+//  protected function __construct() {
+//    $this->name = $name;
+//    $this->title = $title;
+//    $this->description = $description;
+//  }
+//
+//  public static function getInstance($name) {
+//    if (!isset(self::$instances[$name])) {
+//      $instances[$name] = new $name();
+//    }
+//    return $instances[$name];
+//  }
 
-  function __construct($name, $title, $description = NULL) {
-    $this->name = $name;
-    $this->title = $title;
-    $this->description = $description;
-    self::$instances[$name] = $this;
+  public static function getControls() {
+    $ret = QaControl::getControls(get_called_class());
+    return $ret;
   }
 }
 
-class QaControl extends QaPackage {
-  /**
-   * The package to which the control belongs
-   *
-   * @var QaPackage
-   */
-  public $package;
+class QaControl {
 
   /**
    * An options hash
@@ -136,6 +141,60 @@ class QaControl extends QaPackage {
    * @var array
    */
   public $passes;
+
+  /**
+   * Singleton-per-child-class data holder.
+   *
+   * @var array
+   */
+  protected static $instances = array();
+
+  /**
+   * Per-package list of instances
+   *
+   * @var array
+   */
+  protected static $packages = array();
+
+  /**
+   * Singleton protected constructor
+   *
+   * @param string $name
+   */
+  protected function __construct() {}
+
+  public static function getInstance() {
+    $name = get_called_class();
+    if (!isset(self::$instances[$name])) {
+      $instance = new $name();
+      self::$instances[$name] = $instance;
+      self::$packages[$instance->package_name][] = $instance;
+    }
+    return self::$instances[$name];
+  }
+
+  /**
+   * Returns per-package controls.
+   *
+   * @param string $package_name
+   *   If given, only return the list of controls belonging to that package
+   *
+   * @return array
+   *   - if $package_name is given, an array of control instances
+   *   - else a package-name-indexed hash of arrays of control instances
+   */
+  public static function getControls($package_name = NULL) {
+    if (isset($package_name)) {
+      $ret = isset(self::$packages[$package_name])
+        ? self::$packages[$package_name]
+        : NULL;
+    }
+    else {
+      $ret = self::$packages;
+    }
+    return $ret;
+  }
+
 
   /**
    * Run the control.
@@ -224,4 +283,18 @@ class QaPass {
     }
     $this->life->modify();
   }
+}
+
+function _qa_get_controls() {
+  $controls = array(
+    'QaControlViewsPhp',
+  );
+
+  $ret = array();
+  // Instantiate classes to register them and their packages
+  foreach ($controls as $name) {
+    $ret[$name] = call_user_func(array($name, 'getInstance'));
+  }
+
+  return $ret;
 }
