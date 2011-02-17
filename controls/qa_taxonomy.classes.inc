@@ -30,10 +30,19 @@ class QaPackageTaxonomy extends QaPackage {
   }
 }
 
+abstract class QaControlTaxonomy extends QaControl {
+
+  static function getDependencies() {
+    $ret = parent::getDependencies();
+    $ret = array_merge($ret, array('taxonomy'));
+    return $ret;
+  }
+}
+
 /**
  * Find views containing PHP code
  */
-class QaControlTaxonomyFreetagging extends QaControl {
+class QaControlTaxonomyFreetagging extends QaControlTaxonomy {
 
   protected function __construct() {
     parent::__construct();
@@ -42,12 +51,13 @@ class QaControlTaxonomyFreetagging extends QaControl {
     $this->description = t('Unused freetagging terms mean useless volume. Removing them helps makin term autocompletes more relevant.');
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('taxonomy'));
-    return $ret;
-  }
-
+  /**
+   * List unused tags.
+   *
+   * @param object $vocabulary
+   *
+   * @return array
+   */
   function checkTags($vocabulary) {
     $sq = <<<EOT
 SELECT td.tid
@@ -103,7 +113,7 @@ EOT;
   }
 }
 
-class QaControlTaxonomyOrphans extends QaControl {
+class QaControlTaxonomyOrphans extends QaControlTaxonomy {
 
   protected function __construct() {
     parent::__construct();
@@ -112,12 +122,11 @@ class QaControlTaxonomyOrphans extends QaControl {
     $this->description = t('Check for term_node entries pointing to a missing node or term. These should never happen, and should be removed when they do.');
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('taxonomy'));
-    return $ret;
-  }
-
+  /**
+   * Locate {term_node} entries linking to a non-existent term or node revision.
+   *
+   * @return array
+   */
   function checkOrphans() {
     $sq = <<<EOT
 SELECT tn.tid AS tntid,

@@ -31,9 +31,20 @@ class QaPackageViews extends QaPackage {
 }
 
 /**
+ * Shared abstract ancestor class for Views controls, to hold common dependencies.
+ */
+abstract class QaControlViews extends QaControl {
+  static function getDependencies() {
+    $ret = parent::getDependencies();
+    $ret = array_merge($ret, array('views'));
+    return $ret;
+  }
+}
+
+/**
  * Find views containing PHP code
  */
-class QaControlViewsPhp extends QaControl {
+class QaControlViewsPhp extends QaControlViews {
 
   protected function __construct() {
     parent::__construct();
@@ -48,12 +59,6 @@ class QaControlViewsPhp extends QaControl {
     return $ret;
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
-    return $ret;
-  }
-
   function run() {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
@@ -64,23 +69,17 @@ class QaControlViewsPhp extends QaControl {
   }
 }
 
-class QaControlViewsOverrides extends QaControl {
+class QaControlViewsOverrides extends QaControlViews {
 
   protected function __construct() {
     parent::__construct();
     $this->package_name = 'QaPackageViews';
-    $this->title = t('Overridden views');
-    $this->description = t('Have any views been overridden ? This is a performance and change management issue.');
+    $this->title = t('Non-default views');
+    $this->description = t('Have any views been overridden or only created in the DB ? This is a performance and change management issue.');
     parent::__construct();
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
-    return $ret;
-  }
-
-  function checkViewPhp($view) {
+  function checkViewType($view) {
     $status = $view->type == t('Default') ? 1 : 0;
     if (!$status) {
       $name = empty($view->human_name) ? $view->name : $view->human_name;
@@ -105,7 +104,7 @@ class QaControlViewsOverrides extends QaControl {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
     foreach ($views as $view) {
-      $pass->record($this->checkViewPhp($view));
+      $pass->record($this->checkViewType($view));
     }
     $pass->life->end();
 

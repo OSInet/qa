@@ -500,7 +500,8 @@ function _qa_setup() {
   $controls = array();
   while ($o = db_fetch_object($q)) {
     $name = $o->name;
-    if (is_subclass_of($name, 'QaControl')) {
+    $rc = new ReflectionClass($name);
+    if (!$rc->isAbstract() && is_subclass_of($name, 'QaControl')) {
       // Instantiate classes to register them and their packages
       call_user_func(array($name, 'getInstance'));
     }
