@@ -95,7 +95,9 @@ EOT;
         '!terms' => implode(', ', $info['terms']),
       ));
     }
-    $result = theme('item_list', $result);
+    $result = empty($result)
+      ? t('All tags are in use')
+      : theme('item_list', $result);
     $pass->result = $result;
     return $pass;
   }
@@ -116,5 +118,55 @@ class QaControlTaxonomyOrphans extends QaControl {
     return $ret;
   }
 
-  function run() {}
+  function checkOrphans() {
+    $sq = <<<EOT
+SELECT tn.tid AS tntid,
+  td.tid AS tdtid, td.name AS tdname,
+  v.nid, v.vid
+FROM {term_node} tn
+  LEFT JOIN {term_data} td ON tn.tid = td.tid
+  LEFT JOIN {node_revisions} v ON tn.nid = v.nid AND tn.vid = v.vid
+/* WHERE td.tid IS NULL
+  OR v.nid IS NULL or v.vid IS NULL */
+EOT;
+    // No db_rewrite_sql(): we are scanning the whole database for user 1
+    $q = db_query($sq);
+    $orphans = array(
+      'terms' => array(),
+      'revisions' => array(),
+    );
+    while ($o = db_fetch_object($q)) {
+      if (is_null($o->tdtid)) {
+        $orphans['terms'][] = $o->tntid;
+      }
+      if (is_null($o->nid) || is_null($o->vid)) {
+        $orphans['revisions'][] = $o->tntid;
+      }
+    }
+
+    return array(
+      'status' => (empty($orphans['terms']) && empty($orphans['revisions'])) ? 1 : 0,
+      'result' => $orphans,
+    );
+  }
+
+  function run() {
+    $pass = parent::run();
+    $pass->record($this->checkOrphans());
+    $pass->life->end();
+
+    // Prepare for theming
+    $result = $pass->result[0]; // only one pass for this check
+    $result = array(
+      empty($result['terms'])
+        ? t('All terms found')
+        : t('Missing term IDs: @tids', array('@tids' => implode(', ', $result['terms']))),
+      empty($result['revisions'])
+        ? t('All revisions found')
+        : t('Missing node revisions: @vids', array('@vids' => implode(', ', $result['revisions']))),
+    );
+    $result = theme('item_list', $result);
+    $pass->result = $result;
+    return $pass;
+  }
 }
