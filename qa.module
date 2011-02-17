@@ -209,7 +209,6 @@ abstract class QaControl extends QaExportable {
     return $ret;
   }
 
-
   /**
    * Run the control.
    *
@@ -304,6 +303,9 @@ class QaPass {
   }
 }
 
+/**
+ * Implements hook_menu().
+ */
 function qa_menu() {
   $items = array();
   $items['admin/reports/qa'] = array(
@@ -492,17 +494,15 @@ function qa_report_run_pass($class_name, &$context) {
  * @return void
  */
 function _qa_setup() {
-  $controls = array(
-    'QaControlReferences',
-    'QaControlSystem',
-    'QaControlTaxonomyFreetagging',
-    'QaControlTaxonomyOrphans',
-    'QaControlViewsPhp',
-    'QaControlViewsOverrides',
-  );
-
-  // Instantiate classes to register them and their packages
-  foreach ($controls as $name) {
-    call_user_func(array($name, 'getInstance'));
+  // Do not use get_declared_classes(): most of these classes are not yet loaded.
+  $sq = "SELECT ar.name FROM {autoload_registry} ar WHERE type='class'";
+  $q = db_query($sq);
+  $controls = array();
+  while ($o = db_fetch_object($q)) {
+    $name = $o->name;
+    if (is_subclass_of($name, 'QaControl')) {
+      // Instantiate classes to register them and their packages
+      call_user_func(array($name, 'getInstance'));
+    }
   }
 }
