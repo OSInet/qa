@@ -35,3 +35,35 @@ function qa_enable() {
 function qa_disable() {
   cache_clear_all('autoload', 'cache');
 }
+
+/**
+ * Implements hook_requirements().
+ */
+function qa_requirements($phase) {
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  $ret = array(
+    'qa_autoload' => array(
+      'title'       => $t('Autoload, for QA'),
+    ),
+  );
+
+  // Test autoload schema. Autoload 6.1.x did not have the autoload_registry table
+  $registry = drupal_get_schema('autoload_registry');
+  if (empty($registry)) {
+    $ret['qa_autoload'] += array(
+      'value'       => $t('Registry not found'),
+      'description' => $t('QA uses the autoload registry to obtain the list of classes implementing QA Controls without having to require implementation of an info hook by modules containing them. This registry was introduced in Autoload 6.2, but you are probably using version 6.1.x.'),
+      'severity'    => REQUIREMENT_ERROR,
+    );
+  }
+  else {
+    $ret['qa_autoload'] += array(
+      'value'       => $t('Registry found'),
+      'severity'    => REQUIREMENT_OK,
+    );
+  }
+
+  return $ret;
+}
