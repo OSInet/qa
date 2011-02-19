@@ -388,8 +388,9 @@ function qa_report_results() {
 function qa_report_form($form_state) {
 
   $form = array();
-  $controls = _qa_setup(); // initialize list
+  _qa_setup(); // initialize list
   $packages = QaControl::getControls();
+  ksort($packages);
 
   foreach ($packages as $package_name => $package_info) {
     $collapsed = TRUE;
@@ -491,13 +492,15 @@ function qa_report_run_pass($class_name, &$context) {
 /**
  * Initialize the object set.
  *
+ * To find the control classes, get_declared_classes() is useless: most of these
+ * classes are unlikely to be loaded yet. The Autoload registry, on the other
+ * hand, is available, since qa_requirements() made sure it was.
+ *
  * @return void
  */
 function _qa_setup() {
-  // Do not use get_declared_classes(): most of these classes are not yet loaded.
   $sq = "SELECT ar.name FROM {autoload_registry} ar WHERE type='class'";
   $q = db_query($sq);
-  $controls = array();
   while ($o = db_fetch_object($q)) {
     $name = $o->name;
     $rc = new ReflectionClass($name);

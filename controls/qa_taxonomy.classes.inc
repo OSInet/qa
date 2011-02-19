@@ -135,8 +135,8 @@ SELECT tn.tid AS tntid,
 FROM {term_node} tn
   LEFT JOIN {term_data} td ON tn.tid = td.tid
   LEFT JOIN {node_revisions} v ON tn.nid = v.nid AND tn.vid = v.vid
-/* WHERE td.tid IS NULL
-  OR v.nid IS NULL or v.vid IS NULL */
+WHERE td.tid IS NULL
+  OR v.nid IS NULL or v.vid IS NULL
 EOT;
     // No db_rewrite_sql(): we are scanning the whole database for user 1
     $q = db_query($sq);
@@ -152,7 +152,10 @@ EOT;
         $orphans['revisions'][] = $o->tntid;
       }
     }
-
+    $orphans['terms']     = array_unique($orphans['terms']);
+    sort($orphans['terms']);
+    $orphans['revisions'] = array_unique($orphans['revisions']);
+    sort($orphans['revisions']);
     return array(
       'status' => (empty($orphans['terms']) && empty($orphans['revisions'])) ? 1 : 0,
       'result' => $orphans,
