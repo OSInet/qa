@@ -89,7 +89,6 @@ EOT;
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $vid => $vocabulary) {
-    // dsm($vocabulary);
       if ($vocabulary->tags) {
         $pass->record($this->checkTags($vocabulary));
       }
@@ -98,6 +97,7 @@ EOT;
 
     // Prepare for theming
     $result = '';
+    uksort($pass->result, 'strcasecmp'); // @XXX May be inconsistent with non-BMP strings ?
     foreach ($pass->result as $vocabulary_name => $info) {
       $vocabulary_link = l($vocabulary_name, 'admin/content/taxonomy/'. $info['vocabulary']->vid);
       $result[] = t('!link: !terms', array(

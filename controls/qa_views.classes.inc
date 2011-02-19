@@ -110,6 +110,7 @@ class QaControlViewsOverrides extends QaControlViews {
 
     // Prepare for theming
     $result = array();
+    uksort($pass->result, 'strcasecmp'); // @XXX May be inconsistent with non-BMP strings ?
     foreach ($pass->result as $view_name => $view_report) {
       $result[] = t('!view: @type', array(
         '!view' => $view_report[0], // Build safe in self::checkViewPhp
