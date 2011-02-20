@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+/**
+ * @file
+ * Specific rules for QA Module
+ */
+ 
+#qa-results pre {
+  margin: 1px 0;
+  font-size: 80%;
+  line-height: 100%;
+}
+#qa-results td.pre {
+  padding: 0;
+}
