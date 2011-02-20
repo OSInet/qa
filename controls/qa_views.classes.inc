@@ -51,7 +51,6 @@ class QaControlViewsPhp extends QaControlViews {
     $this->package_name = 'QaPackageViews';
     $this->title = t('PHP code within views');
     $this->description = t('Is there any embedded PHP within views and display definitions ? This is both a security risk and a performance issue.');
-    parent::__construct();
   }
 
   function checkViewPhp($view) {
@@ -165,7 +164,6 @@ class QaControlViewsOverrides extends QaControlViews {
     $this->package_name = 'QaPackageViews';
     $this->title = t('Non-default views');
     $this->description = t('Have any views been overridden or only created in the DB ? This is a performance and change management issue.');
-    parent::__construct();
   }
 
   function checkViewType($view) {
