@@ -53,25 +53,39 @@ class QaControlViewsPhp extends QaControlViews {
     $this->description = t('Is there any embedded PHP within views and display definitions ? This is both a security risk and a performance issue.');
   }
 
+  /**
+   * Views 2 had a single string for areas whereas Views 3 has an array for them.
+   */
   function checkViewPhp($view) {
     $php = $this->getPhpFormats();
     $result = array();
     foreach ($view->display as $display_name => $display) {
-      // dsm($display, $display_name);
       foreach (array('header', 'footer', 'empty') as $area_name) {
-        if (isset($display->display_options[$area_name])) {
-          foreach ($display->display_options[$area_name] as $field => $handler_options) {
+        $area = isset($display->display_options[$area_name]) ? $display->display_options[$area_name] : NULL;
+        if (!isset($area)) {
+          continue;
+        }
+
+        if (is_array($area)) { // Views 3 format
+          foreach ($area as $field => $field_options) {
             switch ($field) {
               case 'area':
-                if (in_array($handler_options['format'], $php)) {
-                  $result[$display_name][$area_name][$field] = $handler_options['content'];
+                if (in_array($field_options['format'], $php)) {
+                  $result[$display_name][$area_name][$field] = $field_options['content'];
                 }
                 break;
             }
           }
         }
-      }
-    }
+        else { // Views 2 format
+          $area_format = $display->display_options[$area_name .'_format']; // Always set
+          if (in_array($area_format, $php)) {
+            $result[$display_name][$area_name]['text'] = $area;
+          }
+        }
+      } // foreach header, footer, empty...
+    } // foreach display
+
     $ret = array('name' => $view->name, 'status' => empty($result), 'result' => $result);
     return $ret;
   }
@@ -96,7 +110,6 @@ class QaControlViewsPhp extends QaControlViews {
           }
         }
       }
-      // dsm($php);
     }
     return $php;
   }
