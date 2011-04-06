@@ -56,14 +56,15 @@ WHERE v.language NOT IN ($ph)
 ORDER BY 1, 2
 EOT;
     $q = db_query($sq, $languages);
+    // No db_rewrite_sql: this needs to be unhindered by any access control
     $vars = array();
     while ($o = db_fetch_object($q)) {
       $vars[$o->name][] = $o->language;
     }
 
     $items = array();
-    foreach ($vars as $name => $languages) {
-      $items[] = t('@var: @languages', array('@var' => $name, '@languages' => implode(', ', $languages)));
+    foreach ($vars as $name => $var_languages) {
+      $items[] = t('@var: @languages', array('@var' => $name, '@languages' => implode(', ', $var_languages)));
     }
     $ret = array(
       'name'   => 'extra',
@@ -77,10 +78,34 @@ EOT;
    * Identify variables for which at least one translation is missing
    */
   function checkMissing() {
+    $languages = array_keys(language_list());
+    $ph = db_placeholders($languages, 'char');
+    $sq = <<<EOT
+SELECT v.name, v.language
+FROM {i18n_variable} v
+WHERE v.language IN ($ph)
+ORDER BY 1, 2
+EOT;
+    $q = db_query($sq, $languages);
+    // No db_rewrite_sql: this needs to be unhindered by any access control
+    $vars = array();
+    while ($o = db_fetch_object($q, $ph)) {
+      $vars[$o->name][] = $o->language;
+    }
+
+    $items = array();
+    foreach ($vars as $name => $var_languages) {
+      $missing = array_diff($languages, $var_languages);
+      if (!empty($missing)) {
+        $items[] = t('@var: @languages', array('@var' => $name, '@languages' => implode(', ', $missing)));
+      }
+    }
+
     $ret = array(
       'name'   => 'missing',
-      'status' => 1,
-      'result' => array('missing' => array('none')));
+      'status' => empty($items) ? 1 : 0,
+      'result' => array('missing' => $items),
+    );
     return $ret;
   }
 
