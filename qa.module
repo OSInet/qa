@@ -326,7 +326,18 @@ function qa_menu() {
     'type'            => MENU_CALLBACK,
   );
 
+  $items['dependencies'] = array(
+    'title' => 'Package dependencies',
+    'page callback' => 'qa_page_dependencies',
+    'access callback' => 'module_exists',
+    'access arguments' => array('graphviz_filter'),
+    'file' => 'qa_dependencies.inc',
+  );
   return $items;
+}
+
+function qa_page_dependencies() {
+  return graphviz_filter_render(qa_dependencies());
 }
 
 /**
