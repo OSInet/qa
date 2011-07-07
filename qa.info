@@ -9,6 +9,8 @@ description = Quality Assurance framework and built-in controls
 package = Quality
 dependencies[] = autoload
 core = 6.x
+
+; PHP >= 5.3 needed for get_called_class()
 php = 5.3
 
 files[] = controls/qa_i18n.classes.inc

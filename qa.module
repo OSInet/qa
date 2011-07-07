@@ -184,7 +184,8 @@ abstract class QaControl extends QaExportable {
       }
       self::$packages[$instance->package_name]['controls'][$instance->name] = $instance;
     }
-    return self::$instances[$name];
+    $ret = self::$instances[$name];
+    return $ret;
   }
 
   /**
@@ -494,14 +495,28 @@ function qa_report_form_submit($form, &$form_state) {
  * @return void
  */
 function qa_report_run_pass($class_name, &$context) {
+  $name_arg = array('@class' => $class_name);
+
+  $lookup = autoload_get_lookup();
+  $file = $lookup[$class_name];
   $control = call_user_func(array($class_name, 'getInstance'));
-  $pass = $control->run();
-  if (!$pass->status) {
-    $context['success'] = FALSE;
+
+  if (!is_object($control)) {
+    drupal_set_message(t('Cannot obtain an instance for @class', $name_arg), 'error');
+    $context['results']['#message'] = t('Control @name failed to run.', $name_arg);
+    $context['message'] = t('Control @name failed to run.', $name_arg);
+    $context['results'][$class_name] = 'wow';
   }
-  $context['results']['#message'][] = t('Control @name ran', array('@name' => $class_name));
-  $context['message'] = theme('item_list', $context['results']['#message']);
-  $context['results'][$class_name] = $pass;
+  else {
+    // drupal_set_message(t('Running an instance for @class', $name_arg), 'status');
+    $pass = $control->run();
+    if (!$pass->status) {
+      $context['success'] = FALSE;
+    }
+    $context['results']['#message'][] = t('Control @name ran', array('@name' => $class_name));
+    $context['message'] = theme('item_list', $context['results']['#message']);
+    $context['results'][$class_name] = $pass;
+  }
 }
 
 /**
@@ -511,17 +526,62 @@ function qa_report_run_pass($class_name, &$context) {
  * classes are unlikely to be loaded yet. The Autoload registry, on the other
  * hand, is available, since qa_requirements() made sure it was.
  *
+ * As a fallback, we also invoke hook_autoload_info() to support modules designed for autoload 6.1
+ * in order to complete the list.
+ *
  * @return void
  */
 function _qa_setup() {
-  $sq = "SELECT ar.name FROM {autoload_registry} ar WHERE type='class'";
-  $q = db_query($sq);
-  while ($o = db_fetch_object($q)) {
-    $name = $o->name;
+  // if autoload 6.x-2.x
+  if (db_table_exists('autoload_registry')) {
+    $sq = "SELECT ar.name FROM {autoload_registry} ar WHERE type='class'";
+    $q = db_query($sq);
+    while ($o = db_fetch_object($q)) {
+      $classes[$o->name] = $o->name;
+    }
+  }
+  else { // autoload 6.x-1.x
+    $autoload61_classes = module_invoke_all('autoload_info');
+    foreach ($autoload61_classes as $name => $info) {
+      $classes[$name] = $name;
+    }
+  }
+
+  foreach (array_keys($classes) as $name) {
     $rc = new ReflectionClass($name);
     if (!$rc->isAbstract() && is_subclass_of($name, 'QaControl')) {
       // Instantiate classes to register them and their packages
       call_user_func(array($name, 'getInstance'));
     }
   }
+
+}
+
+/**
+ * Implements hook_autoload_info().
+ *
+ * Provide a fallback mechanism for sites not using autoload 6.2
+ */
+function qa_autoload_info() {
+  $sq = "SELECT s.info FROM {system} s WHERE s.name = 'qa'";
+  $info = db_result(db_query_range($sq, 0, 1));
+  $info = unserialize($info);
+  $files = $info['files'];
+  $path = drupal_get_path('module', 'qa');
+  $prev = get_declared_classes();
+  $ret = array();
+  foreach ($files as $file) {
+    require_once $path .'/'. $file;
+    $new = get_declared_classes();
+    $diff = array_diff($new, $prev);
+    foreach ($diff as $class) {
+      $ret[$class] = array(
+        'file' => basename($file),
+        'file path' => $path .'/'. dirname($file),
+      );
+    }
+    $prev = $new;
+  }
+
+  return $ret;
 }

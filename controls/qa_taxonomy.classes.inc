@@ -78,11 +78,12 @@ EOT;
         'query' => array('destination' => 'admin/reports/qa/result'),
       ));
     }
-    return array(
+    $ret = array(
       'name'   => $vocabulary->name,
       'status' => empty($result['terms']) ? 1 : 0,
       'result' => $result,
     );
+    return $ret;
   }
 
   function run() {
@@ -168,7 +169,7 @@ EOT;
     $pass->life->end();
 
     // Prepare for theming
-    $result = $pass->result[0]; // only one pass for this check
+    $result = isset($pass->result[0]) ? $pass->result[0] : NULL; // only one pass for this check
     $result = array(
       empty($result['terms'])
         ? t('All terms found')
