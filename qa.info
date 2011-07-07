@@ -6,7 +6,7 @@
 
 name = QA
 description = Quality Assurance framework and built-in controls
-package = Quality
+package = OSInet
 dependencies[] = autoload
 core = 6.x
 

@@ -1,33 +1,33 @@
 <?php
-function _qa_project_get_info($project) {
-  return $project->info/*['dependencies']*/;
-}
-
 function qa_dependencies() {
   $modules = module_rebuild_cache();
-  $modules = array_map('_qa_project_get_info', $modules);
   krsort($modules);
   require_once(_graphviz_create_filepath(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'));
+
+  $font = array('fontsize' => 10);
   $G = new Image_Graphviz(TRUE);
-  $G->addAttributes(array('rankdir' => 'RL'));
+  $G->addAttributes(array('rankdir' => 'RL') + $font);
   $packages = array();
-  foreach ($modules as $module => $info) {
-    if (!empty($info['package'])) {
-      $packages[$info['package']] = $info['package'];
-      $G->addNode($module, array(), urlencode($info['package']));
+  foreach ($modules as $module => $detail) {
+    if (!$detail->status) {
+      continue;
+    }
+    if (!empty($detail->info['package'])) {
+      $packages[$detail->info['package']] = $detail->info['package'];
+      $G->addNode($module, $font, urlencode($detail->info['package']));
     }
     else {
-      $G->addNode($module);
+      $G->addNode($module, $font);
     }
 
-    foreach ($info['dependencies'] as $depend) {
-      $G->addEdge(array($module => $depend));
+    foreach ($detail->info['dependencies'] as $depend) {
+      $G->addEdge(array($module => $depend), $font);
     }
     //dsm($info, $module);
   }
   ksort($packages);
   foreach ($packages as $package) {
-    $G->addCluster(urlencode($package), $package);
+    $G->addCluster(urlencode($package), $package, $font);
   }
   return $G;
 }
