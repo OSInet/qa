@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * OSInet QA Plugin for i18n (internationalization) module
@@ -49,12 +48,12 @@ class QaControlI18nVariables extends QaControl {
   function checkExtra() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
-    $sq = <<<EOT
+    $sq = <<<sql
 SELECT v.name, v.language
 FROM {i18n_variable} v
 WHERE v.language NOT IN ($ph)
 ORDER BY 1, 2
-EOT;
+sql;
     $q = db_query($sq, $languages);
     // No db_rewrite_sql: this needs to be unhindered by any access control
     $vars = array();
@@ -80,12 +79,12 @@ EOT;
   function checkMissing() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
-    $sq = <<<EOT
+    $sq = <<<sql
 SELECT v.name, v.language
 FROM {i18n_variable} v
 WHERE v.language IN ($ph)
 ORDER BY 1, 2
-EOT;
+sql;
     $q = db_query($sq, $languages);
     // No db_rewrite_sql: this needs to be unhindered by any access control
     $vars = array();

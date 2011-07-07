@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * OSInet QA Plugin for Views 6.3

@@ -1,4 +1,12 @@
 <?php
+/**
+ * @file
+ * Dependencies graph generator, usable both from Drush and Web.
+ */
+
+/**
+ * Graph generator.
+ */
 function qa_dependencies() {
   $modules = module_rebuild_cache();
   krsort($modules);

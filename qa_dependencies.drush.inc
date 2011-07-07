@@ -1,5 +1,10 @@
 <?php
 /**
+ * @file
+ * Drush plugin wrapping the dependencies generator.
+ */
+
+/**
  * Implementation of hook_drush_command().
  */
 function qa_dependencies_drush_command() {

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * OSInet QA Plugin for Taxonomy 6.x
@@ -59,13 +58,13 @@ class QaControlTaxonomyFreetagging extends QaControlTaxonomy {
    * @return array
    */
   function checkTags($vocabulary) {
-    $sq = <<<EOT
+    $sq = <<<sql
 SELECT td.tid
 FROM {term_data} td
   LEFT JOIN {term_node} tn ON td.tid = tn.tid
 WHERE
   td.vid = %d AND tn.nid IS NULL
-EOT;
+sql;
     // no db_rewrite_sql(): we are checking the whole database
     $q = db_query($sq, $vocabulary->vid);
     $result = array(
@@ -129,7 +128,7 @@ class QaControlTaxonomyOrphans extends QaControlTaxonomy {
    * @return array
    */
   function checkOrphans() {
-    $sq = <<<EOT
+    $sq = <<<sql
 SELECT tn.tid AS tntid,
   td.tid AS tdtid, td.name AS tdname,
   v.nid, v.vid
@@ -138,7 +137,7 @@ FROM {term_node} tn
   LEFT JOIN {node_revisions} v ON tn.nid = v.nid AND tn.vid = v.vid
 WHERE td.tid IS NULL
   OR v.nid IS NULL or v.vid IS NULL
-EOT;
+sql;
     // No db_rewrite_sql(): we are scanning the whole database for user 1
     $q = db_query($sq);
     $orphans = array(

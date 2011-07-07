@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * OSInet Quality Assurance module for Drupal: module installer
@@ -47,7 +46,10 @@ function qa_requirements($phase) {
 
   $ret = array(
     'qa_autoload' => array(
-      'title'       => $t('Autoload, for QA'),
+      'title'       => $t('QA: Autoload'),
+    ),
+    'qa_graphviz' => array(
+      'title'       => $t('QA: GraphViz Filter'),
     ),
   );
 
@@ -67,5 +69,18 @@ function qa_requirements($phase) {
     );
   }
 
+  if (!module_exists('graphviz_filter')) {
+    $ret['qa_graphviz'] += array(
+      'value'       => $t('GraphViz filter not found'),
+      'description' => $t('QA uses the Graphviz_filter module and PEAR Image_Graphviz to plot module and theme dependencies.'),
+      'severity'    => REQUIREMENT_WARNING,
+    );
+  }
+  else {
+    $ret['qa_graphviz'] += array(
+      'value'       => $t('GraphViz filter found'),
+      'severity'    => REQUIREMENT_OK,
+    );
+  }
   return $ret;
 }

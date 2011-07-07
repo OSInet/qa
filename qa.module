@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * OSInet Quality Assurance module for Drupal
@@ -417,11 +416,11 @@ function qa_report_form($form_state) {
     $collapsed = TRUE;
     $form[$package_name] = array(
       '#type' => 'fieldset',
-      '#title' => $package_info['package']->title,
-      '#description' => $package_info['package']->description,
+      '#title' => filter_xss_admin($package_info['package']->title),
+      '#description' => filter_xss_admin($package_info['package']->description),
       '#collapsible' => TRUE,
     );
-    foreach ($package_info['controls'] as $control_name => $control) {
+  foreach ($package_info['controls'] as $control_name => $control) {
       $default_value = isset($_SESSION[$control_name]) ? $_SESSION[$control_name] : NULL;
       if ($default_value) {
         $collapsed = FALSE;
@@ -441,12 +440,14 @@ function qa_report_form($form_state) {
       $form[$package_name][$control_name] = array(
         '#type'          => 'checkbox',
         '#default_value' => $met ? $default_value : 0,
-        '#title'         => $control->title,
-        '#description'   => $control->description,
+        '#title'         => filter_xss_admin($control->title),
+        '#description'   => filter_xss_admin($control->description),
         '#disabled'      => !$met,
       );
       $form[$package_name][$control_name .'-dependencies'] = array(
-        '#value' => t('Depends on: !dependencies', array('!dependencies' => implode(', ', $deps))),
+        '#value' => t('Depends on: !dependencies', array(
+          '!dependencies' => implode(', ', $deps),
+          )),
         '#prefix' => '<div class="admin-dependencies">',
         '#suffix' => '</div>',
       );
@@ -458,6 +459,7 @@ function qa_report_form($form_state) {
     '#type'  => 'submit',
     '#value' => t('Run controls'),
   );
+
   return $form;
 }
 
