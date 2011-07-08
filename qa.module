@@ -303,6 +303,22 @@ class QaPass {
   }
 }
 
+/**
+ * Return the version of autoload module currently enabled.
+ *
+ * @return array
+ * - major (6)
+ * - minor (1 or 2)
+ */
+function _qa_get_autoload_version() {
+  $path = drupal_get_path('module', 'autoload');
+  $info = parse_ini_file($path . '/autoload.info');
+  $elements = array();
+  preg_match('/^(.+)\.x-(.+)\./', $info['version'], $elements);
+  $ret = array('major' => $elements[1], 'minor' => $elements[2]);
+  return $ret;
+}
+
 function qa_init() {
   drupal_add_css(drupal_get_path('module', 'qa') .'/qa.css');
 }
@@ -539,15 +555,15 @@ function qa_report_run_pass($class_name, &$context) {
  * @return void
  */
 function _qa_setup() {
-  // if autoload 6.x-2.x
-  if (db_table_exists('autoload_registry')) {
+  $autoload = _qa_get_autoload_version();
+  if ($autoload['minor'] != 1) {
     $sq = "SELECT ar.name FROM {autoload_registry} ar WHERE type='class'";
     $q = db_query($sq);
     while ($o = db_fetch_object($q)) {
       $classes[$o->name] = $o->name;
     }
   }
-  else { // autoload 6.x-1.x
+  else {
     $autoload61_classes = module_invoke_all('autoload_info');
     foreach ($autoload61_classes as $name => $info) {
       $classes[$name] = $name;

@@ -40,15 +40,15 @@ function qa_dependencies() {
     }
 
     foreach ($detail->info['dependencies'] as $depend) {
-      $G->addEdge(array($module => $depend), $font);
+      $G->addEdge(array($module => $depend), $font + array('color' => 'silver'));
     }
     //dsm($info, $module);
   }
 
   foreach ($themes as $theme => $detail) {
-//    if (!$detail->status) {
-//      continue;
-//    }
+    if (empty($detail->status)) {
+      continue;
+    }
     if (!empty($detail->owner)) {
       $engine = basename($detail->owner); // with extension
 
