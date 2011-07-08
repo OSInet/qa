@@ -357,8 +357,14 @@ function qa_menu() {
   return $items;
 }
 
+/**
+ * Page callback for qa/dependencies
+ *
+ * @return string
+ */
 function qa_page_dependencies() {
-  return graphviz_filter_render(qa_dependencies());
+  $G = qa_dependencies();
+  return graphviz_filter_render($G); // passed by reference: cannot pass a function return
 }
 
 /**
