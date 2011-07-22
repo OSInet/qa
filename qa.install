@@ -53,6 +53,7 @@ function qa_requirements($phase) {
     ),
   );
 
+  module_load_include('module', 'qa');
   $autoload = _qa_get_autoload_version();
   switch ($autoload['minor']) {
     case 1:
