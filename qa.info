@@ -1,4 +1,3 @@
-; $Id$
 ;
 ; @file
 ; Manifest for the OSInet Quality Assurance module
@@ -7,8 +6,7 @@
 name = QA
 description = Quality Assurance framework and built-in controls
 package = OSInet
-dependencies[] = autoload
-core = 6.x
+core = 7.x
 
 ; PHP >= 5.3 needed for get_called_class()
 php = 5.3
@@ -20,4 +18,3 @@ files[] = controls/qa_taxonomy.classes.inc
 files[] = controls/qa_views.classes.inc
 
 recommends[] = graphviz_filter
- 

@@ -26,7 +26,7 @@
  */
 function qa_enable() {
   cache_clear_all('autoload', 'cache', TRUE); // autoload 6.1 uses "autoload:", 6.2 "autoload"
-  autoload_get_lookup(TRUE);
+  // autoload_get_lookup(TRUE);
 }
 
 /**
@@ -34,7 +34,7 @@ function qa_enable() {
  */
 function qa_disable() {
   cache_clear_all('autoload', 'cache', TRUE); // autoload 6.1 uses "autoload:", 6.2 "autoload"
-  autoload_get_lookup(TRUE);
+  // autoload_get_lookup(TRUE);
 }
 
 /**
@@ -95,3 +95,44 @@ function qa_requirements($phase) {
   }
   return $ret;
 }
+
+/**
+ * Implementation of hook_requirements().
+ *
+ * Copied from graphviz_filter_requirements().
+ */
+function qa_requirements2($phase) {
+  $requirements = array();
+  $t = get_t();
+
+  if ($phase == 'runtime') {
+    // Check for availability of `dot`.
+    $output = array();
+    $return = 0;
+
+    $function = function_exists('_graphviz_create_filepath')
+      ? '_graphviz_create_filepath'
+      : '_qa_graphviz_create_filepath';
+
+    $command = $function(variable_get('graphviz_filter_dot_path', ''), 'dot');
+    exec("$command -V 2>&1", $output, $return);
+    $requirements['dot'] = array(
+      'title' => $t('Graphviz tools'),
+      'value' => check_plain(implode('<br />', $output)),
+      'severity' => $return != 0 ? REQUIREMENT_ERROR : REQUIREMENT_OK,
+    );
+
+    // Check for availability of PEAR::Image_GraphViz.
+    $pear = (bool)(($handle = @fopen($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'), 'r', TRUE)) && fclose($handle));
+    $requirements['pear'] = array(
+      'title' => $t('Graphviz PEAR package'),
+      'value' => $pear ? $t('The PEAR::Image_GraphViz package was found.') :
+                         $t('The PEAR::Image_GraphViz package was not found.
+                             Graphviz Filter will still function normally, but some sub-modules (such as CCK Schema and Workflow Graph) will not.
+                             Please install the package and/or make sure that the Graphviz Filter settings are set to locate it properly.'),
+      'severity' => $pear ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+    );
+  }
+  return $requirements;
+}
+

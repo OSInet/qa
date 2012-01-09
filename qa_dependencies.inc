@@ -5,16 +5,33 @@
  */
 
 /**
+ * Clone of function _graphviz_create_filepath() from graphviz_filter.module.
+ *
+ * @param string $path
+ * @param string $filename
+ */
+function _qa_graphviz_create_filepath($path, $filename) {
+  if (!empty($path)) {
+    return rtrim($path, '/') .'/'. $filename;
+  }
+  return $filename;
+}
+
+/**
  * Graph generator.
  */
 function qa_dependencies() {
-  $modules = module_rebuild_cache();
+  $modules = system_rebuild_module_data();
   krsort($modules);
 
   $themes = list_themes();
   krsort($themes);
 
-  require_once(_graphviz_create_filepath(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'));
+  $function = function_exists('_graphviz_create_filepath')
+    ? '_graphviz_create_filepath'
+    : '_qa_graphviz_create_filepath';
+
+  require_once($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'));
 
   $font = array('fontsize' => 10);
   $G = new Image_Graphviz(TRUE);

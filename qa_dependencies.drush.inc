@@ -14,7 +14,6 @@ function qa_dependencies_drush_command() {
     'description' => 'Build a Graphviz DOT file showing the module and theme dependencies on the site',
     'aliases' => array('qadep'),
   );
-
   return $items;
 }
 
