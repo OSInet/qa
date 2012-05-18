@@ -11,10 +11,4 @@ core = 7.x
 ; PHP >= 5.3 needed for get_called_class()
 php = 5.3
 
-files[] = controls/qa_i18n.classes.inc
-files[] = controls/qa_references.classes.inc
-files[] = controls/qa_system.classes.inc
-files[] = controls/qa_taxonomy.classes.inc
-files[] = controls/qa_views.classes.inc
-
 recommends[] = graphviz_filter

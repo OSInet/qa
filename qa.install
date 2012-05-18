@@ -54,31 +54,6 @@ function qa_requirements($phase) {
   );
 
   module_load_include('module', 'qa');
-  $autoload = _qa_get_autoload_version();
-  switch ($autoload['minor']) {
-    case 1:
-      $ret['qa_autoload'] += array(
-        'value'       => $t('Autoload 6.1'),
-        'description' => $t('A version of Autoload 6.1 is installed, which is only used by QA as a fallback with known limitations. Upgrading to the latest Autoload 6.2 is recommended, although not strictly required.'),
-        'severity'    => REQUIREMENT_WARNING,
-      );
-      break;
-
-    case 2:
-      $ret['qa_autoload'] += array(
-        'value'       => $t('Autoload 6.2'),
-        'severity'    => REQUIREMENT_OK,
-      );
-      break;
-
-    default:
-      $ret['qa_autoload'] += array(
-        'value'       => $t('Autoload @major.@minor', array('@major' => $autoload['major'], '@minor' => $autoload['minor'])),
-        'description' => $t('QA only supports versions 6.1 and 6.2 of autoload.module. Compatibility with this version is unknown: please contact support@osinet.fr or report an issue on drupal.org for details.'),
-        'severity'    => REQUIREMENT_WARNING,
-      );
-      break;
-  }
 
   if (!module_exists('graphviz_filter')) {
     $ret['qa_graphviz'] += array(
