@@ -41,11 +41,12 @@ class Overrides extends Views {
 
     // Prepare for theming
     $result = array();
-    uksort($pass->result, 'strcasecmp'); // @XXX May be inconsistent with non-BMP strings ?
+    // @XXX May be inconsistent with non-BMP strings ?
+    uksort($pass->result, 'strcasecmp');
     foreach ($pass->result as $view_name => $view_report) {
       $result[] = t('!view: @type', array(
-          '!view' => $view_report[0], // Build safe in self::checkViewPhp
-          '@type' => $view_report[1],
+        '!view' => $view_report[0], // Built safe in self::checkViewPhp
+        '@type' => $view_report[1],
       ));
     }
     $result = theme('item_list', array('items' => $result));

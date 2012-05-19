@@ -270,7 +270,8 @@ function qa_report_form_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
+  drupal_set_message(t('Prepare to run these controls: @controls', array(
+    '@controls' => implode(', ', array_keys($controls)))), 'status');
   $batch = array(
     'operations'       => array(),
     'title'            => t('QA Controls running'),

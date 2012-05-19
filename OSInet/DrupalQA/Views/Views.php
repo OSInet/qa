@@ -9,11 +9,6 @@ use OSInet\DrupalQA\BaseControl;
  */
 abstract class Views extends BaseControl {
 
-  public function __construct() {
-    parent::__construct();
-    $this->package_name = __NAMESPACE__;
-  }
-
   static function getDependencies() {
     $ret = parent::getDependencies();
     $ret = array_merge($ret, array('views'));

@@ -21,14 +21,17 @@ class Php extends Views {
     $result = array();
     foreach ($view->display as $display_name => $display) {
       foreach (array('header', 'footer', 'empty') as $area_name) {
-        $area = isset($display->display_options[$area_name]) ? $display->display_options[$area_name] : NULL;
+        $area = isset($display->display_options[$area_name])
+          ? $display->display_options[$area_name]
+          : NULL;
         if (!isset($area)) {
           continue;
         }
 
-        if (is_array($area)) { // Views 3 format
+        // Views 3 format.
+        if (is_array($area)) {
           foreach ($area as $field => $field_options) {
-            switch ($field) {
+            switch ($field_options['field']) {
               case 'area':
                 if (in_array($field_options['format'], $php)) {
                   $result[$display_name][$area_name][$field] = $field_options['content'];
@@ -37,7 +40,8 @@ class Php extends Views {
             }
           }
         }
-        else { // Views 2 format
+        // Views 2 format: should no longer exist on D7.
+        else {
           $area_format = $display->display_options[$area_name .'_format']; // Always set
           if (in_array($area_format, $php)) {
             $result[$display_name][$area_name]['text'] = $area;
@@ -83,11 +87,13 @@ class Php extends Views {
     $pass->life->end();
 
     if ($pass->status) {
-      $result = format_plural(count($views), '1 view checked, none containing PHP', '@count views checked, none containing PHP', NULL);
+      $result = format_plural(count($views), '1 view checked, none containing PHP',
+        '@count views checked, none containing PHP', array());
     }
     else {
-      $result = format_plural(count($views), '1 view checked and containing PHP', '@count views checked, @php containing PHP', array(
-        '@php' => count($pass->result),
+      $result = format_plural(count($views), '1 view checked and containing PHP',
+        '@count views checked, @php containing PHP', array(
+          '@php' => count($pass->result),
       ));
       $header = array(
         t('View'),
@@ -99,17 +105,18 @@ class Php extends Views {
       $data = array();
       foreach ($pass->result as $view_name => $displays) {
         $row = array();
-        $view_link = empty($views[$view_name]->human_name)
-          ? l($view_name,         'admin/build/views/edit/'. $view_name)
-          : l($views[$view_name], 'admin/build/views/edit/'. $view_name);
+        $link_title = empty($views[$view_name]->human_name)
+          ? $view_name
+          : $views[$view_name]->human_name;
+        $view_link = l($link_title, "admin/structure/views/view/$view_name/edit");
         $row['view'] = array('data' => $view_link);
         foreach ($displays as $display_id => $areas) {
-          $row['display'] = $display_id;
+          $row['display'] = l($display_id, "admin/structure/views/view/$view_name/edit/$display_id");
           foreach ($areas as $area_name => $fields) {
-            $row['area'] = $area_name;
+            $row['area'] = l($area_name, "admin/structure/views/nojs/rearrange/$view_name/$display_id/$area_name");
             foreach ($fields as $field => $content) {
               $row['field'] = l($field,
-                'admin/build/views/nojs/config-item/'. $view_name .'/'. $display_id .'/'. $area_name .'/'. $field,
+                'admin/structure/views/nojs/config-item/'. $view_name .'/'. $display_id .'/'. $area_name .'/'. $field,
                 array('query' => array('destination' => 'admin/reports/qa/results'))
               );
               $row['content'] = array(
@@ -122,8 +129,10 @@ class Php extends Views {
         }
       }
       ksort($data);
-      // theme_table();
-      $result .= theme('table', $header, $data);
+      $result .= theme('table', array(
+        'header' => $header,
+        'rows' => $data,
+      ));
     }
     $pass->result = $result;
     return $pass;

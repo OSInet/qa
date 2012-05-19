@@ -7,7 +7,7 @@ use OSInet\DrupalQA\BaseControl;
 /**
  * Find views containing PHP code
  */
-class System extends BaseControl {
+class Unused extends BaseControl {
 
   public function __construct() {
     parent::__construct();

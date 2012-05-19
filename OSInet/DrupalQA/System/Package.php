@@ -30,6 +30,6 @@ class Package extends BasePackage {
   function __construct() {
     parent::__construct();
     $this->title = t('System');
-    // $this->description = t('Look for unused code on disk');
+    $this->description = t('Look for unused code on disk');
   }
 }

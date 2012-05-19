@@ -22,22 +22,6 @@
  */
 
 /**
- * Implements hook_install().
- */
-function qa_enable() {
-  cache_clear_all('autoload', 'cache', TRUE); // autoload 6.1 uses "autoload:", 6.2 "autoload"
-  // autoload_get_lookup(TRUE);
-}
-
-/**
- * Implements hook_uninstall().
- */
-function qa_disable() {
-  cache_clear_all('autoload', 'cache', TRUE); // autoload 6.1 uses "autoload:", 6.2 "autoload"
-  // autoload_get_lookup(TRUE);
-}
-
-/**
  * Implements hook_requirements().
  */
 function qa_requirements($phase) {
