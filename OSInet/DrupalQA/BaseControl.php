@@ -39,6 +39,11 @@ abstract class BaseControl extends Exportable {
    */
   protected static $packages = array();
 
+  public function __construct() {
+    parent::__construct();
+    $this->package_name = $this->namespace;
+  }
+
   /**
    * Return an array of module dependencies.
    *
@@ -97,7 +102,7 @@ abstract class BaseControl extends Exportable {
    */
   public function run() {
     $key = uniqid(variable_get('site_key', NULL));
-    $pass = new QaPass($this);
+    $pass = new Pass($this);
     $this->passes[$key] = $pass;
     return $pass;
   }

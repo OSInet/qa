@@ -5,7 +5,7 @@ namespace OSInet\DrupalQA;
 /**
  * A control pass.
  */
-class QaPass {
+class Pass {
   /**
    * The control of which this is a pass
    *

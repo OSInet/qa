@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * OSInet Quality Assurance module for Drupal
@@ -21,7 +22,14 @@
  * drupal.org organization or the downstream distributor, not OSInet.
  */
 
-
+/**
+ * Implements hook_init().
+ *
+ * - add module CSS.
+ * - register custom autoloader.
+ *
+ * TODO probabaly remove the CSS from here.
+ */
 function qa_init() {
   drupal_add_css(drupal_get_path('module', 'qa') .'/qa.css');
   spl_autoload_register('qa_autoload');
@@ -35,27 +43,31 @@ function qa_init() {
  * @param string $name
  */
 function qa_autoload($name) {
-  // watchdog('qa/autoload', 'Loading %name', array('%name' => $name), WATCHDOG_DEBUG);
+  // Adjust verbosity if needed.
+  $verbose = FALSE;
+
+  $verbose && watchdog('qa/autoload', 'Loading %name', array('%name' => $name), WATCHDOG_DEBUG);
   if (strpos($name, 'OSInet\DrupalQA\\') !== 0) {
-    // drupal_set_message("Skipping $name");
     return;
   }
+
+  $module_path = drupal_get_path('module', 'qa');
   $path_array = explode('\\', $name);
   $filename = array_pop($path_array);
-  array_unshift($path_array, drupal_get_path('module', 'qa'));
+  array_unshift($path_array, $module_path);
   $path = implode('/', $path_array);
   if (!is_dir($path) || !is_readable($path)) {
-    drupal_set_message("Cannot read plugins directory $path.");
+    $args = array('%path' => $path);
+    drupal_set_message(t("Cannot read plugins directory %path.", $args), 'warning');
+    watchdog('qa', "Cannot read plugins directory %path", $args, WATCHDOG_WARNING);
   }
   $path_array[] = "{$filename}.php";
   $path = implode('/', $path_array);
   $sts = include_once $path;
-  /*
-  drupal_set_message(t('QA Autoloaded %path: @result', array(
+  $verbose && drupal_set_message(t('QA Autoloaded %path: @result', array(
     '%path' => $path,
     '@result' => $sts ? t('Success'): t('Failure'),
   )));
-  */
 }
 
 /**
@@ -64,28 +76,27 @@ function qa_autoload($name) {
 function qa_menu() {
   $items = array();
   $items['admin/reports/qa'] = array(
-    'title'           => 'Quality Assurance',
-    'page callback'   => 'drupal_get_form',
-    'page arguments'  => array('qa_report_form'),
-    'access callback' => 'qa_report_access',
+    'title'            => 'Quality Assurance',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('qa_report_form'),
+    'access arguments' => array('access site reports'),
   );
   $items['admin/reports/qa/results'] = array(
-    'title'           => 'Quality Assurance results',
-    'page callback'   => 'qa_report_results',
-    'page arguments'  => array(),
-    'access callback' => 'qa_report_access',
-    'type'            => MENU_CALLBACK,
+    'title'            => 'Quality Assurance results',
+    'page callback'    => 'qa_report_results',
+    'page arguments'   => array(),
+    'access arguments' => array('access site reports'),
+    'type'             => MENU_CALLBACK,
   );
   $items['admin/reports/qa/list'] = array(
-    'title'           => 'QA Tests',
-    'type'            => MENU_DEFAULT_LOCAL_TASK,
+    'title'            => 'QA Tests',
+    'type'             => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/reports/qa/dependencies'] = array(
     'title'            => 'Dependencies',
     'type'             => MENU_LOCAL_TASK,
     'page callback'    => 'qa_page_dependencies',
-    'access callback'  => 'module_exists',
-    'access arguments' => array('graphviz_filter'),
+    'access arguments' => array('access site reports'),
     'file'             => 'qa_dependencies.inc',
     'weight'           => 1,
   );
@@ -95,21 +106,24 @@ function qa_menu() {
 /**
  * Page callback for qa/dependencies
  *
+ * TODO convert to native Image_GraphViz to remove dependency on graphviz_filter
+ * XXX convert to Grafizzi to remove dependency on Image_GraphViz
+ *
  * @return string
  */
 function qa_page_dependencies() {
   $G = qa_dependencies();
-  return graphviz_filter_render($G); // passed by reference: cannot pass a function return
+  // passed by reference: cannot pass a function return
+  return graphviz_filter_render($G);
 }
 
 /**
- * Access callback for QA reports.
+ * Batch conclusion callback.
+ *
+ * @param boolean $success
+ * @param array $results
+ * @param array $operations
  */
-function qa_report_access() {
-  global $user;
-  return isset($user->uid) && $user->uid == 1;
-}
-
 function qa_report_finished($success, $results, $operations) {
   unset($results['#message']);
   if ($success) {
@@ -146,13 +160,23 @@ function qa_report_results() {
     $data[] = array(
       $control->title,
       $pass->status
-        ? theme('image', 'misc/watchdog-ok.png',    t('OK'))
-        : theme('image', 'misc/watchdog-error.png', t('Error')),
+        ? theme('image', array(
+          'path' => 'misc/watchdog-ok.png',
+          'alt' => t('OK'),
+          ))
+        : theme('image', array(
+          'path' => 'misc/watchdog-error.png',
+          'alt' => t('Error'),
+          )),
       $pass->result,
     );
   }
-
-  $ret = theme('table', $header, $data, array('id' => 'qa-results'));
+  $ret = theme('table', array(
+    'header' => $header,
+    'rows' => $data,
+    'attributes' => array(
+      'id' => 'qa-results',
+    )));
   // unset($_SESSION['qa_results']);
   return $ret;
 }
@@ -231,14 +255,22 @@ function qa_report_form($form, $form_state) {
 function qa_report_form_submit($form, &$form_state) {
   $controls = array();
   foreach ($form_state['values'] as $item => $value) {
-    if (class_exists($item) && is_subclass_of($item, 'QaControl')) {
+    if (class_exists($item) && is_subclass_of($item, '\OSInet\DrupalQA\BaseControl')) {
       if ($value) {
         $controls[$item] = $value;
       }
       $_SESSION[$item] = $value;
     }
+    elseif ($value == 1) {
+      $args = array(
+        '%control' => $item,
+      );
+      drupal_set_message(t('Requested invalid control %control', $args), 'error');
+      watchdog('qa', 'Requested invalid control %control', $args, WATCHDOG_ERROR);
+    }
   }
-  // drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
+
+  drupal_set_message(t('Prepare to run these controls: @controls', array('@controls' => implode(', ', array_keys($controls)))));
   $batch = array(
     'operations'       => array(),
     'title'            => t('QA Controls running'),
@@ -263,23 +295,20 @@ function qa_report_form_submit($form, &$form_state) {
 function qa_report_run_pass($class_name, &$context) {
   $name_arg = array('@class' => $class_name);
 
-  $lookup = autoload_get_lookup();
-  $file = $lookup[$class_name];
-  $control = call_user_func(array($class_name, 'getInstance'));
-
+  $control = new $class_name();
   if (!is_object($control)) {
     drupal_set_message(t('Cannot obtain an instance for @class', $name_arg), 'error');
-    $context['results']['#message'] = t('Control @name failed to run.', $name_arg);
-    $context['message'] = t('Control @name failed to run.', $name_arg);
+    $context['results']['#message'] = t('Control @class failed to run.', $name_arg);
+    $context['message'] = t('Control @class failed to run.', $name_arg);
     $context['results'][$class_name] = 'wow';
   }
   else {
-    // drupal_set_message(t('Running an instance for @class', $name_arg), 'status');
+    drupal_set_message(t('Running a control instance for @class', $name_arg), 'status');
     $pass = $control->run();
     if (!$pass->status) {
       $context['success'] = FALSE;
     }
-    $context['results']['#message'][] = t('Control @name ran', array('@name' => $class_name));
+    $context['results']['#message'][] = t('Control @class ran', $name_arg);
     $context['message'] = theme('item_list', $context['results']['#message']);
     $context['results'][$class_name] = $pass;
   }

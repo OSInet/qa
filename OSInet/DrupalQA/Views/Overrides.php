@@ -16,7 +16,7 @@ class Overrides extends Views {
       $name = empty($view->human_name) ? $view->name : $view->human_name;
       $result = array(
           module_exists('views_ui')
-          ? l($name, 'admin/build/views/edit/'. $view->name)
+          ? l($name, "admin/structure/views/view/{$view->name}/edit")
           : $name,
           $view->type);
     }
@@ -24,9 +24,9 @@ class Overrides extends Views {
       $result = NULL;
     }
     $ret = array(
-        'name'   => $view->name,
-        'status' => $status,
-        'result' => $result,
+      'name'   => $view->name,
+      'status' => $status,
+      'result' => $result,
     );
     return $ret;
   }
@@ -48,7 +48,7 @@ class Overrides extends Views {
           '@type' => $view_report[1],
       ));
     }
-    $result = theme('item_list', $result);
+    $result = theme('item_list', array('items' => $result));
     $pass->result = $result;
     return $pass;
   }

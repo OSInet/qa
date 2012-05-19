@@ -19,6 +19,13 @@ abstract class Exportable {
   public $name;
 
   /**
+   * The namespace for the class.
+   *
+   * @var string
+   */
+  public $namespace;
+
+  /**
    * Description: translatable
    *
    * @var string
@@ -73,5 +80,6 @@ abstract class Exportable {
     $this->name = get_called_class();
     $rc = new \ReflectionClass($this->name);
     $this->dir = dirname($rc->getFileName());
+    $this->namespace = $rc->getNamespaceName();
   }
 }

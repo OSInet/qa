@@ -11,7 +11,6 @@ class System extends BaseControl {
 
   public function __construct() {
     parent::__construct();
-    $this->package_name = __NAMESPACE__;
     $this->title = t('Unused non-core packages');
     $this->description = t('Unused modules and themes present on disk can represent a useless cost on most dimensions. Packages entirely unused should usually be removed. This does not necessarily hold in a multi-site filesystem layout.');
   }
@@ -20,7 +19,10 @@ class System extends BaseControl {
    * Identify packages entirely consisting of not-enabled modules.
    */
   function checkModules() {
-    $ret = array('status' => 1, 'result' => array());
+    $ret = array(
+      'status' => 1,
+      'result' => array(),
+    );
     return $ret;
   }
 
@@ -28,12 +30,10 @@ class System extends BaseControl {
    * Identify disabled themes not used as base themes for an enabled theme.
    */
   function checkThemes() {
-    $ret = array('status' => 1, 'result' => array());
-    return $ret;
-  }
-
-  static function getDependencies() {
-    $ret = parent::getDependencies();
+    $ret = array(
+      'status' => 1,
+      'result' => array(),
+    );
     return $ret;
   }
 
@@ -43,5 +43,6 @@ class System extends BaseControl {
     $pass->life->modify();
     $pass->record($this->checkThemes());
     $pass->life->end();
+    return $pass;
   }
 }
