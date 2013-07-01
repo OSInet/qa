@@ -10,7 +10,7 @@ class Freetagging extends Taxonomy {
   public function __construct() {
     parent::__construct();
     $this->title = t('Unused freetagging terms');
-    $this->description = t('Unused freetagging terms mean useless volume. Removing them helps makin term autocompletes more relevant.');
+    $this->description = t('Unused freetagging terms mean useless volume. Removing them helps making term autocompletion more relevant.');
   }
 
   /**
@@ -23,19 +23,21 @@ class Freetagging extends Taxonomy {
   function checkTags($vocabulary) {
     $sq = <<<sql
 SELECT td.tid
-FROM {term_data} td
-  LEFT JOIN {term_node} tn ON td.tid = tn.tid
+FROM {taxonomy_term_data} td
+  LEFT JOIN {taxonomy_index} tn ON td.tid = tn.tid
 WHERE
-  td.vid = %d AND tn.nid IS NULL
+  td.vid = :vid AND tn.nid IS NULL
 sql;
     // no db_rewrite_sql(): we are checking the whole database
-    $q = db_query($sq, $vocabulary->vid);
+    $q = db_query($sq, array(':vid' => $vocabulary->vid));
     $result = array(
       'vocabulary' => $vocabulary,
       'terms' => array(),
     );
-    while ($o = db_fetch_object($q)) {
-      $term = taxonomy_get_term($o->tid); // has an internal cache, so we may loop
+
+    foreach ($q->fetchAll() as $o) {
+      dsm($o);
+      $term = taxonomy_term_load($o->tid); // has an internal cache, so we may loop
       $result['terms'][$term->tid] = l($term->name, 'admin/content/taxonomy/edit/term/'. $term->tid, array(
         'query' => array('destination' => 'admin/reports/qa/result'),
       ));
