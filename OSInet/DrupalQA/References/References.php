@@ -9,8 +9,10 @@ use OSInet\DrupalQA\BaseControl;
  */
 class References extends BaseControl {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
     $this->package_name = __NAMESPACE__;
     $this->title = t('References to missing nodes or users');
     $this->description = t('Missing nodes or references mean broken links and a bad user experience. These should usually be edited.');

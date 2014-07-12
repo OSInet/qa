@@ -4,8 +4,11 @@ namespace OSInet\DrupalQA\Views;
 
 class Overrides extends Views {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('Non-default views');
     $this->description = t('Have any views been overridden or only created in the DB ? This is a performance and change management issue.');
   }
@@ -43,7 +46,7 @@ class Overrides extends Views {
     $result = array();
     // @XXX May be inconsistent with non-BMP strings ?
     uksort($pass->result, 'strcasecmp');
-    foreach ($pass->result as $view_name => $view_report) {
+    foreach ($pass->result as $view_report) {
       $result[] = t('!view: @type', array(
         '!view' => $view_report[0], // Built safe in self::checkViewPhp
         '@type' => $view_report[1],

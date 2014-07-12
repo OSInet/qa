@@ -9,8 +9,10 @@ use OSInet\DrupalQA\BaseControl;
  */
 class Variables extends BaseControl {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
     $this->package_name = __NAMESPACE__;
     $this->title = t('Inconsistent variables translation');
     $this->description = t('In most scenarios, when a variable is translated at least once, it ought to be translated in every language on the site, not more, not less.');

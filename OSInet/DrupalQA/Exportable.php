@@ -39,6 +39,12 @@ abstract class Exportable {
    */
   public $title;
 
+  /**
+   * @param $base
+   * @param $ancestor
+   *
+   * @return array
+   */
   public static function getClasses($base, $ancestor) {
     $realBase = realpath($base);
     $rdi = new \RecursiveDirectoryIterator($base, \FilesystemIterator::SKIP_DOTS);
@@ -73,13 +79,22 @@ abstract class Exportable {
 
   /**
    * Singleton protected constructor
-   *
-   * @param string $name
    */
   public function __construct() {
     $this->name = get_called_class();
     $rc = new \ReflectionClass($this->name);
     $this->dir = dirname($rc->getFileName());
     $this->namespace = $rc->getNamespaceName();
+    $this->init();
   }
+
+  /**
+   * Initializer: must be implemented in concrete classes.
+   *
+   * Assignment to $this->package_name cannot be factored because it uses a
+   * per-class magic constant.
+   *
+   * @return void
+   */
+  abstract public function init();
 }

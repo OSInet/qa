@@ -26,9 +26,8 @@ namespace OSInet\DrupalQA\I18n;
 use OSInet\DrupalQA\BasePackage;
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  public function init() {
     $this->title = t('i18n');
-    // $this->description = t('Inconsistent variables translation');
+    $this->description = t('Inconsistent variables translation');
   }
 }

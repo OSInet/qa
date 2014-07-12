@@ -4,8 +4,11 @@ namespace OSInet\DrupalQA\Taxonomy;
 
 class Orphans extends Taxonomy {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('Inconsistent node tagging');
     $this->description = t('Check for taxonomy_index entries pointing to a missing node or term. These should never happen, and should be removed when they do.');
   }
@@ -54,7 +57,7 @@ sql;
     $pass = parent::run();
     $pass->record($this->checkOrphans());
     $pass->life->end();
-dsm($pass);
+
     // Prepare for theming. Only one pass for this check.
     $result = isset($pass->result[0]) ? $pass->result[0] : NULL;
     $result = array(

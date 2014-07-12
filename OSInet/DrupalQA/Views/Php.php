@@ -7,8 +7,11 @@ namespace OSInet\DrupalQA\Views;
  */
 class Php extends Views {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('PHP code within views');
     $this->description = t('Is there any embedded PHP within views and display definitions ? This is both a security risk and a performance issue.');
   }

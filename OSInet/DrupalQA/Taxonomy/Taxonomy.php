@@ -6,6 +6,9 @@ use OSInet\DrupalQA\BaseControl;
 
 abstract class Taxonomy extends BaseControl {
 
+  /**
+   * {@inheritdoc]
+   */
   public function __construct() {
     parent::__construct();
     $this->package_name = __NAMESPACE__;

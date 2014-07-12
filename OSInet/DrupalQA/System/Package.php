@@ -27,8 +27,7 @@ use OSInet\DrupalQA\BasePackage;
  */
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  public function init() {
     $this->title = t('System');
     $this->description = t('Look for unused code on disk');
   }

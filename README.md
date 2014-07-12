@@ -5,11 +5,11 @@ This module needs to be installed on your site to run checks on various aspects
 of your production database and file layout.
 
 It is designed to be extended by additional module implementing control classes
-derived from OSInet\DrupalQA\Control, which it will identifiy automatically.
+derived from OSInet\DrupalQA\Control, which it will identify automatically.
 
 It also provides a dependency graph of enabled modules and themes, usable either
 on the Web UI for smaller sites or from drush for bigger graphs. This feature
-will only appear on your site if the graphviz_filter module is enabled, which 
+will only appear on your site if the graphviz_filter module is enabled, which
 implies installation of PEAR Image_Graphviz.
 
 2014-07-12: This Drupal 7 version is not feature-equivalent with the D6

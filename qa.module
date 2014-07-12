@@ -155,7 +155,7 @@ function qa_report_results() {
     t('Results'),
   );
   $data = array();
-  foreach ($results as $class_name => $pass) {
+  foreach ($results as $pass) {
     $control = $pass->control;
     $data[] = array(
       $control->title,

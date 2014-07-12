@@ -27,8 +27,7 @@ namespace OSInet\DrupalQA\References;
 use OSInet\DrupalQA\BasePackage;
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  public function init() {
     $this->title = t('Node/User References');
     $this->description = t('Look for references to missing nodes or users');
   }

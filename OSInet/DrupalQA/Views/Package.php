@@ -27,8 +27,10 @@ use OSInet\DrupalQA\BasePackage;
  */
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
     $this->title = t('Views quality controls');
     $this->description = t('Look for overridden views and views containing embedded PHP');
   }

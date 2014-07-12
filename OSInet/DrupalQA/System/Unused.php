@@ -9,8 +9,11 @@ use OSInet\DrupalQA\BaseControl;
  */
 class Unused extends BaseControl {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('Unused non-core packages');
     $this->description = t('Unused modules and themes present on disk can represent a useless cost on most dimensions. Packages entirely unused should usually be removed. This does not necessarily hold in a multi-site filesystem layout.');
   }

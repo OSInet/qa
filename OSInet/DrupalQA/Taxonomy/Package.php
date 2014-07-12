@@ -27,8 +27,10 @@ use OSInet\DrupalQA\BasePackage;
  */
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
     $this->title = t('Taxonomy quality controls');
     $this->description = t('Look for orphan freetags, and inconsistent node tagging');
   }

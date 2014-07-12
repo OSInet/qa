@@ -16,5 +16,6 @@ abstract class BasePackage extends Exportable {
     }
     return self::$instances[$name];
   }
+
 }
 

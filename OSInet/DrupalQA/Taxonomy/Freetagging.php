@@ -7,8 +7,11 @@ namespace OSInet\DrupalQA\Taxonomy;
  */
 class Freetagging extends Taxonomy {
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('Unused freetagging terms');
     $this->description = t('Unused freetagging terms mean useless volume. Removing them helps making term autocompletion more relevant.');
   }
@@ -36,7 +39,6 @@ sql;
     );
 
     foreach ($q->fetchAll() as $o) {
-      dsm($o);
       $term = taxonomy_term_load($o->tid); // has an internal cache, so we may loop
       $result['terms'][$term->tid] = l($term->name, 'admin/content/taxonomy/edit/term/'. $term->tid, array(
         'query' => array('destination' => 'admin/reports/qa/result'),
@@ -53,7 +55,7 @@ sql;
   function run() {
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
-    foreach ($vocabularies as $vid => $vocabulary) {
+    foreach ($vocabularies as $vocabulary) {
       if ($vocabulary->tags) {
         $pass->record($this->checkTags($vocabulary));
       }

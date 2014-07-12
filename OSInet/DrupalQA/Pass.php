@@ -9,7 +9,7 @@ class Pass {
   /**
    * The control of which this is a pass
    *
-   * @var Control
+   * @var \OSInet\DrupalQA\BaseControl
    */
   public $control;
 
@@ -25,7 +25,7 @@ class Pass {
   /**
    * The pass lifecycle
    *
-   * @var Same
+   * @var \OSInet\DrupalQA\Same
    */
   public $life;
 
@@ -46,6 +46,9 @@ class Pass {
    */
   public $result;
 
+  /**
+   * @param \OSInet\DrupalQA\BaseControl $control
+   */
   function __construct($control) {
     $this->life = new Same();
     $this->status = NULL;

@@ -8,8 +8,11 @@ class Size extends BaseControl {
   const DATA_SIZE_LIMIT = 524288; // Memcache default entry limit: 1024*1024 * 0.5 for safety
   const DATA_SUMMARY_LENGTH = 1024;
 
-  public function __construct() {
-    parent::__construct();
+  /**
+   * {@inheritdoc]
+   */
+  public function init() {
+    $this->package_name = __NAMESPACE__;
     $this->title = t('Suspicious cache content');
     $this->description = t('Look for empty or extra-long (>= 1 MB) cache content.');
   }
@@ -58,23 +61,20 @@ class Size extends BaseControl {
    *   - result: information in case of failed check.
    */
   function checkBin($bin_name) {
-//dsm("Checking $bin_name");
     $ret = array(
       'name' => $bin_name,
     );
+    $ret['status'] = FALSE;
+    $arg = array('@name' => $bin_name);
     if (!db_table_exists($bin_name)) {
-      $ret['status'] = FALSE;
-      $ret['result'] = t('Bin @name is missing in the database.', array('@name' => $bin_name));
-
+      $ret['result'] = t('Bin @name is missing in the database.', $arg);
       return $ret;
     }
 
     $sql = "SELECT cid, data, expire, created, serialized FROM {$bin_name} ORDER BY cid";
     $q = db_query($sql);
     if (!$q) {
-      $ret['status'] = FALSE;
-      $ret['result'] = t('Failed fetching database data for bin @name.', array('@name' => $bin_name));
-
+      $ret['result'] = t('Failed fetching database data for bin @name.', $arg);
       return $ret;
     }
 
@@ -109,7 +109,7 @@ class Size extends BaseControl {
     $pass->life->end();
 
     if ($pass->status) {
-      $result = format_plural(count($bins), '1 bin checked, not containing suspicious values',
+      $pass->result = format_plural(count($bins), '1 bin checked, not containing suspicious values',
         '@count bins checked, none containing suspicious values', array());
     }
     else {
@@ -149,8 +149,8 @@ class Size extends BaseControl {
         )
       );
       $pass->result = drupal_render($build);
-      return $pass;
     }
+    return $pass;
   }
 
 }

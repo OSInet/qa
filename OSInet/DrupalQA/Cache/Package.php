@@ -27,8 +27,7 @@ use OSInet\DrupalQA\BasePackage;
  */
 
 class Package extends BasePackage {
-  function __construct() {
-    parent::__construct();
+  public function init() {
     $this->title = t('Cache');
     $this->description = t('Look for suspicious content in database cache. Do NOT use with other cache types.');
   }

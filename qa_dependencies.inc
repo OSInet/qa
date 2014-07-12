@@ -9,6 +9,8 @@
  *
  * @param string $path
  * @param string $filename
+ *
+ * @return string
  */
 function _qa_graphviz_create_filepath($path, $filename) {
   if (!empty($path)) {
