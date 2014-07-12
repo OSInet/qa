@@ -96,7 +96,7 @@ abstract class BaseControl extends Exportable {
   /**
    * Run the control.
    *
-   * @return int
+   * @return \OSInet\DrupalQA\Pass
    *   - 0: failure
    *   - 1: success
    */
