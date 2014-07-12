@@ -12,7 +12,7 @@ on the Web UI for smaller sites or from drush for bigger graphs. This feature
 will only appear on your site if the graphviz_filter module is enabled, which 
 implies installation of PEAR Image_Graphviz.
 
-2012-05-19: This Drupal 7 version is not yet feature-equivalent with the D6
+2014-07-12: This Drupal 7 version is not feature-equivalent with the D6
 version. Porting status below.
 
 <table>
@@ -20,6 +20,11 @@ version. Porting status below.
     <th>Package</th>
     <th>Control</th>
     <th>Status</th>
+    </tr>
+  <tr>
+    <td>Cache</td>
+    <td>Size</td>
+    <td>Working.</td>
     </tr>
   <tr>
     <td>I18N</td>
