@@ -9,6 +9,71 @@ class Size extends BaseControl {
   const DATA_SUMMARY_LENGTH = 1024;
 
   /**
+   * @param string $bin_name
+   *
+   * @return array
+   *   - name: the name of the checked bin
+   *   - status: 0 for KO, 1 for OK
+   *   - result: information in case of failed check.
+   */
+  function checkBin($bin_name) {
+    $ret = array(
+      'name' => $bin_name,
+    );
+    $ret['status'] = FALSE;
+    $arg = array('@name' => $bin_name);
+
+    if (!db_table_exists($bin_name)) {
+      $ret['result'] = t('Bin @name is missing in the database.', $arg);
+      return $ret;
+    }
+
+    $sql = "SELECT cid, data, expire, created, serialized FROM {$bin_name} ORDER BY cid";
+    $q = db_query($sql);
+    if (!$q) {
+      $ret['result'] = t('Failed fetching database data for bin @name.', $arg);
+      return $ret;
+    }
+
+    list($status, $result) = $this->checkBinContents($q);
+
+    $ret['status'] = $status;
+    $ret['result'] = $result;
+
+    return $ret;
+  }
+
+  /**
+   * Check the contents of an existing and accessible bin.
+   *
+   * @param $q
+   *   The DBTNG query object for the bin contents, already queried.
+   *
+   * @return array
+   *   - 0 : status bool
+   *   - 1 : result array
+   */
+  protected function checkBinContents($q) {
+    $status = TRUE;
+    $result = array();
+    foreach ($q->fetchAll() as $row) {
+      // Cache drivers will need to serialize anyway.
+      $data = $row->serialized ? $row->data : serialize($row->data);
+      $len = strlen($data);
+      if ($len == 0 || $len >= static::DATA_SIZE_LIMIT) {
+        $status = FALSE;
+        $result[] = array(
+          $row->cid,
+          number_format($len, 0, ',', '&nbsp;'),
+          check_plain(drupal_substr($data, 0, static::DATA_SUMMARY_LENGTH)) . '&hellip;',
+        );
+      }
+    }
+
+    return array($status, $result);
+  }
+
+  /**
    * {@inheritdoc]
    */
   public function init() {
@@ -48,54 +113,6 @@ class Size extends BaseControl {
       }
     }
     sort($ret);
-
-    return $ret;
-  }
-
-  /**
-   * @param string $bin_name
-   *
-   * @return array
-   *   - name: the name of the checked bin
-   *   - status: 0 for KO, 1 for OK
-   *   - result: information in case of failed check.
-   */
-  function checkBin($bin_name) {
-    $ret = array(
-      'name' => $bin_name,
-    );
-    $ret['status'] = FALSE;
-    $arg = array('@name' => $bin_name);
-    if (!db_table_exists($bin_name)) {
-      $ret['result'] = t('Bin @name is missing in the database.', $arg);
-      return $ret;
-    }
-
-    $sql = "SELECT cid, data, expire, created, serialized FROM {$bin_name} ORDER BY cid";
-    $q = db_query($sql);
-    if (!$q) {
-      $ret['result'] = t('Failed fetching database data for bin @name.', $arg);
-      return $ret;
-    }
-
-    $status = TRUE;
-    $result = array();
-    foreach ($q->fetchAll() as $row) {
-      // Cache drivers will need to serialize anyway.
-      $data = $row->serialized ? $row->data : serialize($row->data);
-      $len = strlen($data);
-      if ($len == 0 || $len >= static::DATA_SIZE_LIMIT) {
-        $status = FALSE;
-        $result[] = array(
-          $row->cid,
-          number_format($len, 0, ',', '&nbsp;'),
-          check_plain(drupal_substr($data, 0, static::DATA_SUMMARY_LENGTH)) . '&hellip;',
-        );
-      }
-    }
-
-    $ret['status'] = $status;
-    $ret['result'] = $result;
 
     return $ret;
   }
