@@ -1,6 +1,8 @@
 Quality Assurance module
 ========================
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/FGM/qa/badges/quality-score.png?b=7.x-1.x)](https://scrutinizer-ci.com/g/FGM/qa/?branch=7.x-1.x)
+
 This module needs to be installed on your site to run checks on various aspects
 of your production database and file layout.
 
@@ -12,58 +14,65 @@ on the Web UI for smaller sites or from drush for bigger graphs. This feature
 will only appear on your site if the graphviz_filter module is enabled, which
 implies installation of PEAR Image_Graphviz.
 
-2014-07-12: This Drupal 7 version is not feature-equivalent with the D6
-version. Porting status below.
-
 <table>
+  <caption>Porting status on 2014-07-13</caption>
   <tr>
     <th>Package</th>
     <th>Control</th>
-    <th>Status</th>
+    <th>Drupal 8</th>
+    <th>Drupal 7</th>
+    <th>Drupal/Pressflow 6</th>
     </tr>
   <tr>
     <td>Cache</td>
     <td>Size</td>
-    <td>Working.</td>
+    <td rowspan="8">Branch not opened</td>
+    <td>OK</td>
+    <td>Not implemented</td>
     </tr>
   <tr>
     <td>I18N</td>
     <td>Variables</td>
-    <td>Untested.</td>
+    <td>Crashes</td>
+    <td>OK</td>
     </tr>
   <tr>
     <td>References</td>
     <td>References</td>
-    <td>Untested. Will test the Rereferences module.</td>
+    <td>Not implemented</td>
+    <td>Stub</td>
     </tr>
   <tr>
     <td>System</td>
     <td>Unused</td>
-    <td>Does not crash but does not work.</td>
+    <td>Stub</td>
+    <td>Stub</td>
     </tr>
   <tr>
-    <td>Taxonomy</td>
+    <td rowspan="2">Taxonomy</td>
     <td>Freetagging</td>
-    <td>Does not crash but may not work.</td>
+    <td>Runs, but may not work</td>
+    <td>OK</td>
     </tr>
   <tr>
-    <td>Taxonomy</td>
     <td>Orphans</td>
     <td>Crashes.</td>
+    <td>OK</td>
     </tr>
   <tr>
-    <td>Views</td>
+    <td rowspan="2">Views</td>
     <td>Override</td>
-    <td>Working.</td>
+    <td>OK</td>
+    <td>OK</td>
     </tr>
   <tr>
-    <td>Views</td>
     <td>Php</td>
-    <td>Working. Slight UI improvements over 6.x.</td>
+    <td>OK. Improved UI</td>
+    <td>OK</td>
     </tr>
   </table>
 
-Next controls planned:
+Next controls envisioned:
 
 <table>
   <tr>
