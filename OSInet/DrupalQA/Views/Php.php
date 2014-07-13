@@ -33,7 +33,7 @@ class Php extends Views {
     $ret = array();
     $area_format = $display->display_options[$area_name .'_format']; // Always set
     if (in_array($area_format, $php)) {
-      $result['text'] = $area;
+      $ret['text'] = $area;
     }
     return $ret;
   }
@@ -62,16 +62,16 @@ class Php extends Views {
    */
   public function checkViewPhp($view) {
     $php = $this->getPhpFormats();
+    $areas = array('header', 'footer', 'empty');
     $result = array();
+
     foreach ($view->display as $display_name => $display) {
-      foreach (array('header', 'footer', 'empty') as $area_name) {
-        $area = isset($display->display_options[$area_name])
-          ? $display->display_options[$area_name]
-          : NULL;
-        if (!isset($area)) {
+      foreach ($areas as $area_name) {
+        if (!isset($display->display_options[$area_name])) {
           continue;
         }
 
+        $area = $display->display_options[$area_name];
         $fragments = is_array($area)
           ? $this->checkViews3Php($area, $php)
           : $this->checkViews2Php($area, $php, $display, $area_name);
