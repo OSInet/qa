@@ -17,9 +17,50 @@ class Php extends Views {
   }
 
   /**
+   * @param string $area
+   *   The area (header, footer, empty) being examined.
+   * @param array $php
+   *   The array of input formats containing PHP.
+   * @param \stdClass $display
+   *   The display being examined.
+   * @param string $area_name
+   *   The name of the area
+   *
+   * @return array
+   *   The array of PHP fragments found in the area.
+   */
+  protected function checkViews2Php($area, array $php, $display, $area_name) {
+    $ret = array();
+    $area_format = $display->display_options[$area_name .'_format']; // Always set
+    if (in_array($area_format, $php)) {
+      $result['text'] = $area;
+    }
+    return $ret;
+  }
+
+  /**
+   * @param array $area
+   *   The area (header, footer, empty) being examined.
+   * @param array $php
+   *   The array of input formats containing PHP.
+   *
+   * @return array
+   *   The array of PHP fragments found in the area.
+   */
+  protected function checkViews3Php(array $area, array $php) {
+    $ret = array();
+    foreach ($area as $field => $field_options) {
+      if ($field_options['field'] == 'area' && in_array($field_options['format'], $php)) {
+        $ret[$field] = $field_options['content'];
+      }
+    }
+    return $ret;
+  }
+
+  /**
    * Views 2 had a single string for areas whereas Views 3 has an array for them.
    */
-  function checkViewPhp($view) {
+  public function checkViewPhp($view) {
     $php = $this->getPhpFormats();
     $result = array();
     foreach ($view->display as $display_name => $display) {
@@ -31,29 +72,21 @@ class Php extends Views {
           continue;
         }
 
-        // Views 3 format.
-        if (is_array($area)) {
-          foreach ($area as $field => $field_options) {
-            switch ($field_options['field']) {
-              case 'area':
-                if (in_array($field_options['format'], $php)) {
-                  $result[$display_name][$area_name][$field] = $field_options['content'];
-                }
-                break;
-            }
-          }
-        }
-        // Views 2 format: should no longer exist on D7.
-        else {
-          $area_format = $display->display_options[$area_name .'_format']; // Always set
-          if (in_array($area_format, $php)) {
-            $result[$display_name][$area_name]['text'] = $area;
-          }
+        $fragments = is_array($area)
+          ? $this->checkViews3Php($area, $php)
+          : $this->checkViews2Php($area, $php, $display, $area_name);
+
+        if (!empty($fragments))  {
+          $result[$display_name][$area_name] = $fragments;
         }
       } // foreach header, footer, empty...
     } // foreach display
 
-    $ret = array('name' => $view->name, 'status' => empty($result), 'result' => $result);
+    $ret = array(
+      'name' => $view->name,
+      'status' => empty($result),
+      'result' => $result,
+    );
     return $ret;
   }
 
