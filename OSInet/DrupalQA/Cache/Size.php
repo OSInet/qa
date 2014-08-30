@@ -64,7 +64,7 @@ class Size extends BaseControl {
         $status = FALSE;
         $result[] = array(
           $row->cid,
-          number_format($len, 0, ',', '&nbsp;'),
+          number_format($len, 0, ',', ''),
           check_plain(drupal_substr($data, 0, static::DATA_SUMMARY_LENGTH)) . '&hellip;',
         );
       }

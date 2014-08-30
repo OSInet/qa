@@ -21,6 +21,7 @@
  * are abided by, the module distributor in that case being the
  * drupal.org organization or the downstream distributor, not OSInet.
  */
+use OSInet\DrupalQA\Variable\Variable;
 
 /**
  * Implements hook_init().
@@ -32,6 +33,14 @@
  */
 function qa_init() {
   drupal_add_css(drupal_get_path('module', 'qa') .'/qa.css');
+}
+
+/**
+ * Implements hook_boot().
+ *
+ * Menu loaders may need objects before hook_init().
+ */
+function qa_boot() {
   spl_autoload_register('qa_autoload');
 }
 
@@ -81,6 +90,29 @@ function qa_menu() {
     'page arguments'   => array('qa_report_form'),
     'access arguments' => array('access site reports'),
   );
+  $items['admin/reports/qa/projects'] = array(
+    'title'           => 'Projects',
+    'type'             => MENU_LOCAL_TASK,
+    'page callback'    => 'qa_report_projects',
+    'access arguments' => array('access site reports'),
+    'file'             => 'qa_projects.inc',
+  );
+  $items['admin/reports/qa/variable'] = array(
+    'title'           => 'Variables',
+    'type'             => MENU_LOCAL_TASK,
+    'page callback'    => 'qa_report_variables',
+    'access arguments' => array('access site reports'),
+    'file'             => 'qa_variables.inc',
+  );
+  $items['admin/reports/qa/variable/%qa_variable'] = array(
+    'title'           => 'Variables',
+    'type'             => MENU_CALLBACK,
+    'page callback'    => 'qa_report_variable',
+    'page arguments'   => array(4),
+    'access arguments' => array('access site reports'),
+    'file'             => 'qa_variables.inc',
+  );
+
   $items['admin/reports/qa/results'] = array(
     'title'            => 'Quality Assurance results',
     'page callback'    => 'qa_report_results',
@@ -313,4 +345,13 @@ function qa_report_run_pass($class_name, &$context) {
     $context['message'] = theme('item_list', $context['results']['#message']);
     $context['results'][$class_name] = $pass;
   }
+}
+
+function qa_variable_load($name) {
+  $variable = new Variable($name);
+  if (!$variable->is_set) {
+    return FALSE;
+  }
+
+  return $variable;
 }

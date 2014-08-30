@@ -56,7 +56,7 @@ sql;
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $vocabulary) {
-      if ($vocabulary->tags) {
+      if (!empty($vocabulary->tags)) {
         $pass->record($this->checkTags($vocabulary));
       }
     }

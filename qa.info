@@ -11,4 +11,6 @@ core = 7.x
 ; PHP >= 5.3 needed for get_called_class()
 php = 5.3
 
+dependencies[] = update
+
 recommends[] = graphviz_filter

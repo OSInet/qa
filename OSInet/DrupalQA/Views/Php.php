@@ -50,7 +50,7 @@ class Php extends Views {
   protected function checkViews3Php(array $area, array $php) {
     $ret = array();
     foreach ($area as $field => $field_options) {
-      if ($field_options['field'] == 'area' && in_array($field_options['format'], $php)) {
+      if ($field_options['field'] == 'area' && isset($field_options['format']) && in_array($field_options['format'], $php)) {
         $ret[$field] = $field_options['content'];
       }
     }
