@@ -26,7 +26,7 @@ implies installation of PEAR Image_Graphviz.
   <tr>
     <td>Cache</td>
     <td>Size</td>
-    <td rowspan="8">Branch not opened</td>
+    <td rowspan="9">Branch not opened</td>
     <td>OK</td>
     <td>Not implemented</td>
     </tr>
@@ -45,19 +45,25 @@ implies installation of PEAR Image_Graphviz.
   <tr>
     <td>System</td>
     <td>Unused</td>
-    <td>Stub</td>
+    <td>OK (as page)</td>
     <td>Stub</td>
     </tr>
   <tr>
     <td rowspan="2">Taxonomy</td>
     <td>Freetagging</td>
-    <td>Runs, but may not work</td>
+    <td>KO</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>Orphans</td>
     <td>Crashes.</td>
     <td>OK</td>
+    </tr>
+  <tr>
+    <td>Variables</td>
+    <td>Size</td>
+    <td>OK (as page)</td>
+    <td>Not implemented</td>
     </tr>
   <tr>
     <td rowspan="2">Views</td>
