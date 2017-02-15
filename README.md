@@ -115,7 +115,7 @@ typically by piping the output like this:
   <tr>
     <td rowspan="4">Workflows (Content Moderation)</td>
     <td>Summary</td>
-    <td>WIP</td>
+    <td>OK (Web + CLI)</td>
     <td colspan="2" rowspan="3">n.a.</td>
     </tr>
   <tr>

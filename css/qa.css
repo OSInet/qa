@@ -3,7 +3,7 @@
  * @file
  * Specific rules for QA Module
  */
- 
+
 #qa-results pre {
   margin: 0.1em 0;
   font-size: 80%;
@@ -11,4 +11,12 @@
 }
 #qa-results td.pre {
   padding: 0;
+}
+
+.qa-results .qa-results__ok {
+  background-color: #77ee77;
+}
+
+.qa-results .qa-results__ko {
+  background-color: #ee7777;
 }

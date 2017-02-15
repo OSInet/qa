@@ -21,3 +21,9 @@ qa.reports.variables:
   base_route: 'qa.reports'
   title: 'Variables'
   weight: 3
+
+qa.reports.workflows.list:
+  route_name: 'qa.reports.workflows.list'
+  base_route: 'qa.reports'
+  title: 'Workflows'
+  weight: 4

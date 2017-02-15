@@ -6,11 +6,36 @@ qa.reports:
   requirements:
     _permission: 'access site reports'
 
+qa.reports.controls:
+  path: '/admin/reports/qa/list'
+  defaults:
+    _controller: '\Drupal\qa\Controller\ControlsListController::report'
+    _title: 'QA Controls'
+  requirements:
+    _permission: 'access site reports'
+
+
+qa.reports.dependencies:
+  path: '/admin/reports/qa/dependencies'
+  defaults:
+    _controller: '\Drupal\qa\Controller\DependenciesReportController::report'
+    _title: 'Dependencies'
+  requirements:
+    _permission: 'access site reports'
+
 qa.reports.projects:
   path: '/admin/reports/qa/projects'
   defaults:
     _controller: '\Drupal\qa\Controller\ProjectsReportController::action'
     _title: 'Projects'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.results:
+  path: '/admin/reports/qa/results'
+  defaults:
+    _controller: '\Drupal\qa\Controller\ResultsReportController::report'
+    _title: 'QA results'
   requirements:
     _permission: 'access site reports'
 
@@ -31,26 +56,10 @@ qa.reports.variables.view:
   requirements:
     _permission: 'access site reports'
 
-qa.reports.controls:
-  path: '/admin/reports/qa/list'
+qa.reports.workflows.list:
+  path: '/admin/reports/qa/workflows'
   defaults:
-    _controller: '\Drupal\qa\Controller\ControlsListController::report'
-    _title: 'QA Controls'
-  requirements:
-    _permission: 'access site reports'
-
-qa.reports.results:
-  path: '/admin/reports/qa/results'
-  defaults:
-    _controller: '\Drupal\qa\Controller\ResultsReportController::report'
-    _title: 'QA results'
-  requirements:
-    _permission: 'access site reports'
-
-qa.reports.dependencies:
-  path: '/admin/reports/qa/dependencies'
-  defaults:
-    _controller: '\Drupal\qa\Controller\DependenciesReportController::report'
-    _title: 'Dependencies'
+    _controller: '\Drupal\qa\Controller\WorkflowsReportController::report'
+    _title: 'Workflows report'
   requirements:
     _permission: 'access site reports'

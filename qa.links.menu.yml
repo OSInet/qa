@@ -27,3 +27,9 @@ qa.reports.variables:
   parent: qa.reports
   description: 'Get a report about your site''s variables.'
   route_name: 'qa.reports.variables'
+
+qa.reports.workflows.list:
+  title: 'Workflow report'
+  parent: qa.reports
+  description: 'Get a report about your site''s workflows.'
+  route_name: 'qa.reports.workflows.list'
