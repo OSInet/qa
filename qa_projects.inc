@@ -1,6 +1,6 @@
 <?php
-use OSInet\DrupalQA\System\Module;
-use OSInet\DrupalQA\System\Project;
+use Drupal\qa\System\Module;
+use Drupal\qa\System\Project;
 
 /**
  * @file
@@ -53,7 +53,7 @@ function qa_report_projects() {
 
   $rows = array();
   $previous_project = '';
-  /** @var \OSInet\DrupalQA\System\Project $project */
+  /** @var \Drupal\qa\System\Project $project */
   foreach ($projects as $name => $project) {
     $row = array();
     $project_cell = array(
@@ -70,7 +70,7 @@ function qa_report_projects() {
     $enabled = t('Enabled');
     $disabled = t('Disabled');
 
-    /** @var \OSInet\DrupalQA\System\Module $module */
+    /** @var \Drupal\qa\System\Module $module */
     foreach (array_values($project->modules) as $index => $module) {
       $row = array();
       $row[] = ($index === 0) ? $project_cell : '';

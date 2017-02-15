@@ -2,9 +2,9 @@
 
 /**
  * @file
- * OSInet Quality Assurance module for Drupal
+ * OSInet Quality Assurance module for Drupal.
  *
- * @copyright Copyright (C) 2005-2012 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
+ * @copyright Copyright (C) 2005-2017 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
  *
  * @since DRUPAL-4-6
  *
@@ -21,119 +21,7 @@
  * are abided by, the module distributor in that case being the
  * drupal.org organization or the downstream distributor, not OSInet.
  */
-use OSInet\DrupalQA\Variable\Variable;
-
-/**
- * Implements hook_init().
- *
- * - add module CSS.
- * - register custom autoloader.
- *
- * TODO probabaly remove the CSS from here.
- */
-function qa_init() {
-  drupal_add_css(drupal_get_path('module', 'qa') .'/qa.css');
-}
-
-/**
- * Implements hook_boot().
- *
- * Menu loaders may need objects before hook_init().
- */
-function qa_boot() {
-  spl_autoload_register('qa_autoload');
-}
-
-/**
- * Dedicated autoloader for QA.
- *
- * Only load symbols in the OSInet\DrupalQA namespace.
- *
- * @param string $name
- */
-function qa_autoload($name) {
-  // Adjust verbosity if needed.
-  $verbose = FALSE;
-
-  $verbose && watchdog('qa/autoload', 'Loading %name', array('%name' => $name), WATCHDOG_DEBUG);
-  if (strpos($name, 'OSInet\DrupalQA\\') !== 0) {
-    return;
-  }
-
-  $module_path = drupal_get_path('module', 'qa');
-  $path_array = explode('\\', $name);
-  $filename = array_pop($path_array);
-  array_unshift($path_array, $module_path);
-  $path = implode('/', $path_array);
-  if (!is_dir($path) || !is_readable($path)) {
-    $args = array('%path' => $path);
-    drupal_set_message(t("Cannot read plugins directory %path.", $args), 'warning');
-    watchdog('qa', "Cannot read plugins directory %path", $args, WATCHDOG_WARNING);
-  }
-  $path_array[] = "{$filename}.php";
-  $path = implode('/', $path_array);
-  $sts = include_once $path;
-  $verbose && drupal_set_message(t('QA Autoloaded %path: @result', array(
-    '%path' => $path,
-    '@result' => $sts ? t('Success'): t('Failure'),
-  )));
-}
-
-/**
- * Implements hook_menu().
- */
-function qa_menu() {
-  $items = array();
-  $items['admin/reports/qa'] = array(
-    'title'            => 'Quality Assurance',
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('qa_report_form'),
-    'access arguments' => array('access site reports'),
-  );
-  $items['admin/reports/qa/projects'] = array(
-    'title'           => 'Projects',
-    'type'             => MENU_LOCAL_TASK,
-    'page callback'    => 'qa_report_projects',
-    'access arguments' => array('access site reports'),
-    'file'             => 'qa_projects.inc',
-  );
-  $items['admin/reports/qa/variable'] = array(
-    'title'           => 'Variables',
-    'type'             => MENU_LOCAL_TASK,
-    'page callback'    => 'qa_report_variables',
-    'access arguments' => array('access site reports'),
-    'file'             => 'qa_variables.inc',
-  );
-  $items['admin/reports/qa/variable/%qa_variable'] = array(
-    'title'           => 'Variables',
-    'type'             => MENU_CALLBACK,
-    'page callback'    => 'qa_report_variable',
-    'page arguments'   => array(4),
-    'access arguments' => array('access site reports'),
-    'file'             => 'qa_variables.inc',
-  );
-
-  $items['admin/reports/qa/results'] = array(
-    'title'            => 'Quality Assurance results',
-    'page callback'    => 'qa_report_results',
-    'page arguments'   => array(),
-    'access arguments' => array('access site reports'),
-    'type'             => MENU_CALLBACK,
-  );
-  $items['admin/reports/qa/list'] = array(
-    'title'            => 'QA Tests',
-    'type'             => MENU_DEFAULT_LOCAL_TASK,
-  );
-  $items['admin/reports/qa/dependencies'] = array(
-    'title'            => 'Dependencies',
-    'type'             => MENU_LOCAL_TASK,
-    'page callback'    => 'qa_page_dependencies',
-    'access arguments' => array('access site reports'),
-    'file'             => 'qa_dependencies.inc',
-    'weight'           => 1,
-  );
-  return $items;
-}
+use Drupal\qa\Variable\Variable;
 
 /**
  * Page callback for qa/dependencies
@@ -203,12 +91,14 @@ function qa_report_results() {
       $pass->result,
     );
   }
-  $ret = theme('table', array(
+  $ret = theme('table', [
     'header' => $header,
     'rows' => $data,
-    'attributes' => array(
+    'attributes' => [
       'id' => 'qa-results',
-    )));
+    ],
+    '#attached' => ['library' => ['qa/results']],
+  ]);
   // unset($_SESSION['qa_results']);
   return $ret;
 }
@@ -221,7 +111,7 @@ function qa_report_results() {
 function qa_report_form($form, $form_state) {
   $form = array();
   $base = drupal_get_path('module', 'qa');
-  $packages = OSInet\DrupalQA\Exportable::getClasses($base, 'OSInet\DrupalQA\BasePackage');
+  $packages = Exportable::getClasses($base, 'Drupal\qa\BasePackage');
   ksort($packages);
   foreach ($packages as $package_name => $package) {
     $collapsed = TRUE;
@@ -231,7 +121,7 @@ function qa_report_form($form, $form_state) {
       '#description' => filter_xss_admin($package->description),
       '#collapsible' => TRUE,
     );
-    $controls = $package->getClasses($package->dir, 'OSInet\DrupalQA\BaseControl');
+    $controls = $package->getClasses($package->dir, 'Drupal\qa\Plugin\Qa\Control\BaseControl');
 
     foreach ($controls as $control_name => $control) {
       $default_value = isset($_SESSION[$control_name])
@@ -270,10 +160,10 @@ function qa_report_form($form, $form_state) {
     $form[$package_name]['#collapsed'] = $collapsed;
   }
 
-  $form['submit'] = array(
+  $form['submit'] = [
     '#type'  => 'submit',
     '#value' => t('Run controls'),
-  );
+  ];
 
   return $form;
 }
@@ -287,7 +177,7 @@ function qa_report_form($form, $form_state) {
 function qa_report_form_submit($form, &$form_state) {
   $controls = array();
   foreach ($form_state['values'] as $item => $value) {
-    if (class_exists($item) && is_subclass_of($item, '\OSInet\DrupalQA\BaseControl')) {
+    if (class_exists($item) && is_subclass_of($item, '\Drupal\qa\Plugin\Qa\Control\BaseControl')) {
       if ($value) {
         $controls[$item] = $value;
       }

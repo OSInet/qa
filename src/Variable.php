@@ -10,7 +10,7 @@
  * @license General Public License version 2 or later
  */
 
-namespace Drupal\qa\Variable;
+namespace Drupal\qa;
 
 
 class Variable {
@@ -36,6 +36,6 @@ class Variable {
   }
 
   public function link() {
-    return l($this->name, "admin/reports/qa/variable/{$this->name}");
+    return l($this->name, "/admin/reports/qa/variable/{$this->name}");
   }
 }

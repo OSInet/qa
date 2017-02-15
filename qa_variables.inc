@@ -11,7 +11,7 @@
  * @license General Public License version 2 or later
  */
 
-use OSInet\DrupalQA\Variable\Variable;
+use Drupal\qa\Variable;
 
 function qa_report_variable(Variable $variable = NULL) {
   $c = cache_get('views_data:fr', 'cache_views');

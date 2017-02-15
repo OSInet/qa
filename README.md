@@ -10,7 +10,7 @@ of your production database, configuration storage and file layout.
 
 It is designed to be extended by additional module implementing control classes.
 
-In D7/D6, these are derived from `Drupal\qa\ControlBase`, which it will identify automatically.
+In D8, these are standard core plugins. In D7/D6, these are derived from `Drupal\qa\ControlBase`, which are supported by a custom plugin system.
 
 ## Graphs
 
@@ -21,13 +21,19 @@ on the Web UI for smaller sites or from drush for bigger graphs. This feature
 will generate GraphViz `.dot` files, to convert with Graphviz `dot` command,
 typically by piping the output like this:
 
-      $ drush qa-dependencies | dot -Tsvg > qa_dependencies.svg 
+```bash
+      $ drush qa-dependencies | dot -Tsvg > qa_dependencies.svg
+```
+
 * On Drupal 8.3 and later, graphs of the transitions in a given workflow (for
   core workflows, not for the contrib workflow module). This feature will 
   generate GraphViz `.dot` files, to convert with Graphviz `dot` command, 
   typically by piping the output like this:
 
-      $ drush qa_workflow_graph | dot -Tsvg > qa_workflow.svg 
+```bash
+       $ drush qa_workflow_graph | dot -Tsvg > qa_workflow.svg 
+```
+* The workflow graph also has a tabular version.
 
 ## Availability per core version
 <table>
@@ -37,72 +43,72 @@ typically by piping the output like this:
     <th>Control</th>
     <th>Drupal 8</th>
     <th>Drupal 7</th>
-    <th>Drupal/Pressflow 6</th>
+    <th>Drupal 6</th>
     </tr>
   <tr>
     <td>Cache</td>
     <td>Size</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK</td>
-    <td>Not implemented</td>
+    <td>n.a.</td>
     </tr>
   <tr>
     <td>I18N</td>
     <td>Variables</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>Crashes</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>References</td>
     <td>References</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>Not implemented</td>
     <td>Stub</td>
     </tr>
   <tr>
     <td rowspan="2">System</td>
     <td>Dependency (graph)</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>Unused</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK (as page)</td>
     <td>Stub</td>
     </Tr>
   <tr>
     <td rowspan="2">Taxonomy</td>
     <td>Freetagging</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>KO</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>Orphans</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>Crashes.</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>Variables</td>
     <td>Size</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK (as page)</td>
     <td>Not implemented</td>
     </tr>
   <tr>
     <td rowspan="2">Views</td>
     <td>Override</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK</td>
     <td>OK</td>
     </tr>
   <tr>
     <td>Php</td>
-    <td>Not implemented</td>
+    <td>Not yet</td>
     <td>OK. Improved UI</td>
     <td>OK</td>
     </tr>
@@ -110,8 +116,7 @@ typically by piping the output like this:
     <td rowspan="4">Workflows (Content Moderation)</td>
     <td>Summary</td>
     <td>WIP</td>
-    <td rowspan="3">n.a.</td>
-    <td rowspan="3">n.a.</td>
+    <td colspan="2" rowspan="3">n.a.</td>
     </tr>
   <tr>
     <td>Transition (graph)</td>

@@ -1,0 +1,29 @@
+qa.reports:
+  title: 'Quality Assurance'
+  parent: 'system.admin_reports'
+  description: 'Access the various QA reports'
+  route_name: 'qa.reports'
+
+qa.reports.controls:
+  title: 'Controls'
+  parent: qa.reports
+  description: 'Access the list of available QA batch controls'
+  route_name: 'qa.reports.controls'
+
+qa.reports.dependencies:
+  title: 'Dependencies'
+  parent: qa.reports
+  description: 'Access the list of extension dependencies'
+  route_name: 'qa.reports.dependencies'
+
+qa.reports.projects:
+  title: 'Projects report'
+  parent: qa.reports
+  description: 'Get a report about your site''s projects.'
+  route_name: 'qa.reports.projects'
+
+qa.reports.variables:
+  title: 'Variables report'
+  parent: qa.reports
+  description: 'Get a report about your site''s variables.'
+  route_name: 'qa.reports.variables'

@@ -1,0 +1,56 @@
+qa.reports:
+  path: '/admin/reports/qa'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Quality Assurance'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.projects:
+  path: '/admin/reports/qa/projects'
+  defaults:
+    _controller: '\Drupal\qa\Controller\ProjectsReportController::action'
+    _title: 'Projects'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.variables:
+  path: '/admin/reports/qa/variables'
+  defaults:
+    _controller: '\Drupal\qa\Controller\VariablesReportController::report'
+    _title: 'Variables'
+  #      'type'             => MENU_LOCAL_TASK,
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.variables.view:
+  path: '/admin/reports/qa/variables/{qaVariable}'
+  defaults:
+    _controller: '\Drupal\qa\Controller\VariablesReportController::view'
+    _title: 'Variable report'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.controls:
+  path: '/admin/reports/qa/list'
+  defaults:
+    _controller: '\Drupal\qa\Controller\ControlsListController::report'
+    _title: 'QA Controls'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.results:
+  path: '/admin/reports/qa/results'
+  defaults:
+    _controller: '\Drupal\qa\Controller\ResultsReportController::report'
+    _title: 'QA results'
+  requirements:
+    _permission: 'access site reports'
+
+qa.reports.dependencies:
+  path: '/admin/reports/qa/dependencies'
+  defaults:
+    _controller: '\Drupal\qa\Controller\DependenciesReportController::report'
+    _title: 'Dependencies'
+  requirements:
+    _permission: 'access site reports'

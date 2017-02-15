@@ -1,0 +1,23 @@
+qa.reports.controls:
+  route_name: 'qa.reports.controls'
+  base_route: 'qa.reports'
+  title: 'Controls'
+  weight: 0
+
+qa.reports.dependencies:
+  route_name: 'qa.reports.dependencies'
+  base_route: 'qa.reports'
+  title: 'Dependencies'
+  weight: 1
+
+qa.reports.projects:
+  route_name: 'qa.reports.projects'
+  base_route: 'qa.reports'
+  title: 'Projects'
+  weight: 2
+
+qa.reports.variables:
+  route_name: 'qa.reports.variables'
+  base_route: 'qa.reports'
+  title: 'Variables'
+  weight: 3
