@@ -14,9 +14,6 @@
 use OSInet\DrupalQA\Variable\Variable;
 
 function qa_report_variable(Variable $variable = NULL) {
-  $c = cache_get('views_data:fr', 'cache_views');
-  $ret = '<pre>' . json_encode($c, JSON_PRETTY_PRINT) . '</pre>';
-  return $ret;
   $bc = drupal_get_breadcrumb();
   $bc[] = l(t('Administration'), 'admin');
   $bc[] = l(t('Reports'), 'admin/reports');

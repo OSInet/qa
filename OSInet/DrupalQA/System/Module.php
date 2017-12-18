@@ -28,12 +28,12 @@ class Module {
 
   public static function createFromCore(\stdClass $object) {
     $o = new Module();
-    $rc = new \ReflectionClass('\OSInet\DrupalQA\System\Module');
+    $rc = new \ReflectionClass(Module::class);
 
     /** @var \ReflectionProperty $p */
     foreach ($rc->getProperties() as $p) {
       $name = $p->getName();
-      $value = $p->getValue($object);
+      $value = $object->{$name};
       $o->{$name} = $value;
     }
 
