@@ -4,7 +4,7 @@ Quality Assurance module
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/FGM/qa/badges/quality-score.png?b=8.x-1.x)](https://scrutinizer-ci.com/g/FGM/qa/?branch=8.x-1.x)
 
 This module needs to be installed on your site to run checks on various aspects
-of your production database, configuration storage and file layout.
+of your production database, configuration storage (D8) and file layout.
 
 ## Controls (checks)
 
@@ -37,13 +37,13 @@ typically by piping the output like this:
 
 ## Availability per core version
 <table>
-  <caption>Status on 2017-02-15</caption>
+  <caption>Porting status on 2018-01-20</caption>
   <tr>
     <th>Package</th>
     <th>Control</th>
     <th>Drupal 8</th>
     <th>Drupal 7</th>
-    <th>Drupal 6</th>
+    <th>Drupal/Pressflow 6</th>
     </tr>
   <tr>
     <td>Cache</td>
@@ -67,7 +67,7 @@ typically by piping the output like this:
     <td>Stub</td>
     </tr>
   <tr>
-    <td rowspan="2">System</td>
+    <td rowspan="3">System</td>
     <td>Dependency (graph)</td>
     <td>Not yet</td>
     <td>OK</td>
@@ -78,7 +78,13 @@ typically by piping the output like this:
     <td>Not yet</td>
     <td>OK (as page)</td>
     <td>Stub</td>
-    </Tr>
+    </tr>
+  <tr>
+    <td>Force removed</td>
+    <td>Untested</td>
+    <td>OK (drush qafrm)</td>
+    <td>n.a.</td>
+    </tr>
   <tr>
     <td rowspan="2">Taxonomy</td>
     <td>Freetagging</td>
