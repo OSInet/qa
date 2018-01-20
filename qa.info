@@ -7,12 +7,12 @@ name = QA
 description = Quality Assurance framework and built-in controls
 package = OSInet
 core = 7.x
-
-; PHP >= 5.3 needed for get_called_class()
-php = 5.3
+php = 7.0
 
 dependencies[] = devel
 dependencies[] = update
+
+configure = admin/reports/qa
 
 ; Needed for Dependencies UI.
 recommends[] = graphviz_filter

@@ -5,7 +5,7 @@
  *
  * @author: Frédéric G. MARAND <fgm@osinet.fr>
  *
- * @copyright (c) 2014 Ouest Systèmes Informatiques (OSInet).
+ * @copyright (c) 2014-2018 Ouest Systèmes Informatiques (OSInet).
  *
  * @license General Public License version 2 or later
  */
@@ -36,6 +36,12 @@ class Project {
     return FALSE;
   }
 
+  /**
+   * How many modules in this project are actually enabled ?
+   *
+   * @return int
+   *   The number of enabled modules.
+   */
   public function useCount() {
     $count = 0;
 
@@ -46,4 +52,5 @@ class Project {
     }
     return $count;
   }
+
 }

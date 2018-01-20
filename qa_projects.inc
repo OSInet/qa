@@ -1,18 +1,26 @@
 <?php
-use OSInet\DrupalQA\System\Module;
-use OSInet\DrupalQA\System\Project;
-
 /**
  * @file
  * qa.projects.inc
  *
  * @author: Frédéric G. MARAND <fgm@osinet.fr>
  *
- * @copyright (c) 2014 Ouest Systèmes Informatiques (OSInet).
+ * @copyright (c) 2014-2018 Ouest Systèmes Informatiques (OSInet).
  *
  * @license General Public License version 2 or later
  */
 
+use OSInet\DrupalQA\System\Module;
+
+/**
+ * Apparently unused, and incorrect, function.
+ *
+ * FIXME found out whether it serves any purpose in the general case.
+ *  It was likely added there as a one-time answer during a specific audit.
+ *
+ * @param \Variable|NULL $variable
+ * @return string
+ */
 function qa_report_project(Variable $variable = NULL) {
   $c = cache_get('views_data:fr', 'cache_views');
   $ret = '<pre>' . json_encode($c, JSON_PRETTY_PRINT) . '</pre>';
@@ -32,17 +40,17 @@ function qa_report_project(Variable $variable = NULL) {
  * Page callback for projects list.
  *
  * @return string
+ *
+ * TODO convert to use ProjectsScanner
+ * TODO find why an \Exception may be thrown.
+ *
+ * @see \OSInet\DrupalQA\System\ProjectsScanner
+ *
+ * @throws \Exception
+ *   Reported by PhpStorm, but unidentified origin.
  */
 function qa_report_projects() {
-  $ret = '<h3>Projects</h3>';
-  drupal_static_reset('update_get_projects');
-  $GLOBALS['conf']['update_check_disabled'] = TRUE;
-  $projects = update_get_projects();
-  ksort($projects);
-  $ret .= kprint_r($projects, TRUE);
-
-  $ret .= '<h3>Modules info</h3>';
-  list($modules, $projects) = Module::getInfo();
+  list(, $projects) = Module::getInfo();
 
   $header = array(
     t('Project'),
