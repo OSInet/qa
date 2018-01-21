@@ -104,13 +104,17 @@ class Php extends Views {
       foreach ($formats as $format) {
         $filters = filter_list_format($format->format);
         foreach ($filters as $filter) {
-          if ($filter->module == 'php') {
+          // If filter->status is not set (early 7.x), the presence of the PHP
+          // module indicates PHP. Otherwise, if filter->status is set,
+          // activation of the module is controlled by this flag.
+          if ($filter->module == 'php' && (!isset($filter->status) || !empty($filter->status))) {
             $php[] = $format->format;
             break;
           }
         }
       }
     }
+
     return $php;
   }
 
