@@ -5,8 +5,8 @@
  * Drush plugin.
  */
 
-use OSInet\DrupalQA\ForceRemoved;
-use OSInet\DrupalQA\System\ProjectsScanner;
+use Drupal\qa\ForceRemoved;
+use Drupal\qa\System\ProjectsScanner;
 
 /**
  * Implementation of hook_drush_command().

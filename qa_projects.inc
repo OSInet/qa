@@ -10,7 +10,8 @@
  * @license General Public License version 2 or later
  */
 
-use OSInet\DrupalQA\System\Module;
+use Drupal\qa\Plugin\Qa\Control\System\Module;
+use Drupal\qa\Plugin\Qa\Control\Variable\Variable;
 
 /**
  * Apparently unused, and incorrect, function.
@@ -44,7 +45,7 @@ function qa_report_project(Variable $variable = NULL) {
  * TODO convert to use ProjectsScanner
  * TODO find why an \Exception may be thrown.
  *
- * @see \OSInet\DrupalQA\System\ProjectsScanner
+ * @see \Drupal\qa\Plugin\Qa\Control\System\ProjectsScanner
  *
  * @throws \Exception
  *   Reported by PhpStorm, but unidentified origin.
@@ -61,7 +62,7 @@ function qa_report_projects() {
 
   $rows = array();
   $previous_project = '';
-  /** @var \OSInet\DrupalQA\System\Project $project */
+  /** @var \Drupal\qa\Plugin\Qa\Control\System\Project $project */
   foreach ($projects as $name => $project) {
     $row = array();
     $project_cell = array(
@@ -78,7 +79,7 @@ function qa_report_projects() {
     $enabled = t('Enabled');
     $disabled = t('Disabled');
 
-    /** @var \OSInet\DrupalQA\System\Module $module */
+    /** @var \Drupal\qa\Plugin\Qa\Control\System\Module $module */
     foreach (array_values($project->modules) as $index => $module) {
       $row = array();
       $row[] = ($index === 0) ? $project_cell : '';

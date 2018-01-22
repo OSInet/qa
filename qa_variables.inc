@@ -11,7 +11,7 @@
  * @license General Public License version 2 or later
  */
 
-use OSInet\DrupalQA\Variable\Variable;
+use Drupal\qa\Plugin\Qa\Control\Variable\Variable;
 
 function qa_report_variable(Variable $variable = NULL) {
   $bc = drupal_get_breadcrumb();

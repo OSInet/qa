@@ -6,11 +6,15 @@ Quality Assurance module
 This module needs to be installed on your site to run checks on various aspects
 of your production database, configuration storage (D8) and file layout.
 
+
 ## Controls (checks)
 
 It is designed to be extended by additional module implementing control classes.
 
-In D8, these are standard core plugins. In D7/D6, these are derived from `Drupal\qa\ControlBase`, which are supported by a custom plugin system.
+In D8, these are standard core plugins. In D7, these are derived from class 
+`Drupal\qa\Plugin\Qa\Control`, and are supported by a custom plugin system. 
+D7 uses a custom PSR-4 autoloader to match the D8 file layout to some extent. 
+
 
 ## Graphs
 
@@ -153,5 +157,3 @@ Next controls envisioned:
     <td>Code / Database / Overridden / Needs Check.</td>
     </tr>
   </table>
-
-
