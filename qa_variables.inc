@@ -25,6 +25,18 @@ function qa_report_variable(Variable $variable = NULL) {
   return $variable->dump();
 }
 
+function _qa_compare_variables($x, $y) {
+  if ($x[1] < $y[1]) {
+    $ret = -1;
+  } elseif ($x[1] > $y[1]) {
+    $ret = 1;
+  } else {
+    $ret = strcmp($x[0], $y[0]);
+  }
+  //echo "comparing" . print_r($x, true) . " / " . print_r($y, true) . ": " . -$ret . "\n";
+  return - $ret;
+}
+
 /**
  * Page callback for variables list.
  *
@@ -63,16 +75,7 @@ function qa_report_variables() {
     $rows[] = $row;
   }
 
-  usort($rows, function ($x, $y) {
-    if ($x[1] < $y[1]) {
-      $ret = -1;
-    } elseif ($x[1] > $y[1]) {
-      $ret = 1;
-    } else {
-      $ret = strcmp($x[0], $y[0]);
-    }
-    return - $ret;
-  });
+  usort($rows, _qa_compare_variables::class);
   return theme('table', array(
     'header' => $header,
     'rows' => $rows,
