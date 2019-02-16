@@ -1,0 +1,5 @@
+services:
+  qa.commands:
+    class: \Drupal\qa\Commands\QaCommands
+    tags:
+      - { name: drush.command }

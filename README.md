@@ -37,7 +37,7 @@ typically by piping the output like this:
 
 ## Availability per core version
 <table>
-  <caption>Porting status on 2018-01-20</caption>
+  <caption>Porting status on 2019-02-16</caption>
   <tr>
     <th>Package</th>
     <th>Control</th>
@@ -69,7 +69,7 @@ typically by piping the output like this:
   <tr>
     <td rowspan="3">System</td>
     <td>Dependency (graph)</td>
-    <td>Not yet</td>
+    <td>OK</td>
     <td>OK</td>
     <td>OK</td>
     </tr>

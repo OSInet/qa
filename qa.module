@@ -32,7 +32,9 @@ use Drupal\qa\Variable\Variable;
  * @return string
  */
 function qa_page_dependencies() {
-  $G = qa_dependencies();
+  /** @var \Drupal\qa\Dependencies $qaDep */
+  $qaDep = \Drupal::service('qa.dependencies');
+  $G = $qaDep->build();
   // passed by reference: cannot pass a function return
   return graphviz_filter_render($G);
 }

@@ -1,0 +1,11 @@
+services:
+  logger.channel.qa:
+    parent: logger.channel_base
+    arguments: ['qa']
+
+  qa.dependencies:
+    class: Drupal\qa\Dependencies
+    arguments:
+      - '@theme_handler'
+      - '@extension.list.module'
+      - '@logger.channel.qa'
