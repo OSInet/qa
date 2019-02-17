@@ -2,7 +2,6 @@
 
 namespace Drupal\qa;
 
-use Doctrine\Common\Util\Debug;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Grafizzi\Graph\Attribute;
@@ -93,7 +92,7 @@ class Dependencies {
    * Strips the optional "namespace" (aka project or package) part of the name.
    *
    * @param string $name
-   * @param array $attrs
+   * @param \Grafizzi\Graph\Attribute[] $attrs
    *
    * @return \Grafizzi\Graph\Node
    */
@@ -114,10 +113,10 @@ class Dependencies {
    *
    * @return \Grafizzi\Graph\Cluster
    */
-  public function cluster(string $name): Cluster {
+  public function cluster(string $name, array $attrs = []): Cluster {
     return new Cluster($this->pimple, urlencode($name), [
       $this->attr('label', $name),
-    ]);
+    ] + $attrs);
   }
 
   protected function initGraph() : Graph {
