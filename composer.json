@@ -1,16 +1,24 @@
 {
-    "name": "osinet/qa",
-    "description": "Quality Assurance tools for Drupal",
-    "type": "drupal-module",
-    "require": {
-        "osinet/grafizzi": "^0.0.1"
-    },
-    "license": "GPL-2.0+",
     "authors": [
         {
             "name": "Frederic G. MARAND",
             "email": "fgm@osinet.fr"
         }
     ],
-    "minimum-stability": "dev"
+    "description": "Quality Assurance tools for Drupal",
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9"
+            }
+        }
+    },
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "name": "osinet/qa",
+    "require": {
+        "php": ">=7.2",
+        "osinet/grafizzi": "^0.0.2"
+    },
+    "type": "drupal-module"
 }

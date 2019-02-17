@@ -12,6 +12,7 @@
 
 namespace Drupal\qa\System;
 
+use Drupal\Core\Extension\Extension;
 
 class Module {
   public $filename;
@@ -26,13 +27,14 @@ class Module {
   public $requires = array();
   public $sort;
 
-  public static function createFromCore(\stdClass $object) {
+  public static function createFromCore(Extension $object) {
     $o = new Module();
-    $rc = new \ReflectionClass('\Drupal\qa\System\Module');
+    $rc = new \ReflectionClass(Extension::class);
 
     /** @var \ReflectionProperty $p */
     foreach ($rc->getProperties() as $p) {
       $name = $p->getName();
+      $p->setAccessible(TRUE);
       $value = $p->getValue($object);
       $o->{$name} = $value;
     }
@@ -40,6 +42,12 @@ class Module {
     return $o;
   }
 
+  /**
+   * @return array
+   *
+   * FIXME very incomplete: still relies on the D7 info structure, missing most
+   * properties on D8.
+   */
   public static function getInfo()  {
     $module_data = system_rebuild_module_data();
     /** @var Module[] $modules */

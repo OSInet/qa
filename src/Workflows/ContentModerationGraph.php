@@ -13,7 +13,6 @@ use Grafizzi\Graph\Node;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Pimple\Container;
-use Pimple\Tests\Fixtures\PimpleServiceProvider;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ContentModerationGraph extends ContentModerationReportBase implements ContainerInjectionInterface {
