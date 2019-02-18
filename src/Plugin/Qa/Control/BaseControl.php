@@ -1,6 +1,10 @@
 <?php
 
-namespace Drupal\qa;
+namespace Drupal\qa\Plugin\Qa\Control;
+
+use Drupal\Component\Utility\Crypt;
+use Drupal\qa\Exportable;
+use Drupal\qa\Pass;
 
 abstract class BaseControl extends Exportable {
 
@@ -104,7 +108,9 @@ abstract class BaseControl extends Exportable {
    *   - 1: success
    */
   public function run() {
-    $key = uniqid(variable_get('site_key', NULL));
+    global $base_url;
+    $site_key = Crypt::hmacBase64($base_url, \Drupal::service('private_key')->get());
+    $key = uniqid($site_key);
     $pass = new Pass($this);
     $this->passes[$key] = $pass;
     return $pass;

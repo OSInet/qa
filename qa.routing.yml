@@ -14,7 +14,6 @@ qa.reports.checks:
   requirements:
     _permission: 'access site reports'
 
-
 qa.reports.dependencies:
   path: '/admin/reports/qa/dependencies'
   defaults:
