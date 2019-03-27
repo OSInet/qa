@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\I18n;
 
+use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
@@ -90,7 +91,7 @@ sql;
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkExtra());
     $pass->life->modify();

@@ -2,6 +2,8 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\Views;
 
+use Drupal\qa\Pass;
+
 class Overrides extends Views {
 
   /**
@@ -34,7 +36,7 @@ class Overrides extends Views {
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
     foreach ($views as $view) {

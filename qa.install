@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * OSInet Quality Assurance module for Drupal: module installer
+ * OSInet Quality Assurance module for Drupal: module installer.
  *
  * @copyright Copyright (C) 2006-2011 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
  *
@@ -25,13 +26,10 @@
  * Implements hook_requirements().
  */
 function qa_requirements($phase) {
-  // Ensure translations don't break at install time
+  // Ensure translations don't break at install time.
   $t = get_t();
 
   $ret = array(
-    'qa_autoload' => array(
-      'title'       => $t('QA: Autoload'),
-    ),
     'qa_graphviz' => array(
       'title'       => $t('QA: GraphViz Filter'),
     ),
@@ -56,7 +54,7 @@ function qa_requirements($phase) {
 }
 
 /**
- * Implementation of hook_requirements().
+ * Implements hook_requirements().
  *
  * Copied from graphviz_filter_requirements().
  */
@@ -82,11 +80,12 @@ function qa_requirements2($phase) {
     );
 
     // Check for availability of PEAR::Image_GraphViz.
-    $pear = (bool)(($handle = @fopen($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'), 'r', TRUE)) && fclose($handle));
+    $pear = (bool) (($handle = @fopen($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'), 'r', TRUE)) && fclose($handle));
     $requirements['pear'] = array(
       'title' => $t('Graphviz PEAR package'),
-      'value' => $pear ? $t('The PEAR::Image_GraphViz package was found.') :
-                         $t('The PEAR::Image_GraphViz package was not found.
+      'value' => $pear
+      ? $t('The PEAR::Image_GraphViz package was found.')
+      : $t('The PEAR::Image_GraphViz package was not found.
                              Graphviz Filter will still function normally, but some sub-modules (such as CCK Schema and Workflow Graph) will not.
                              Please install the package and/or make sure that the Graphviz Filter settings are set to locate it properly.'),
       'severity' => $pear ? REQUIREMENT_OK : REQUIREMENT_ERROR,
@@ -94,4 +93,3 @@ function qa_requirements2($phase) {
   }
   return $requirements;
 }
-

@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\System;
 
+use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
@@ -40,7 +41,7 @@ class Unused extends BaseControl {
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkModules());
     $pass->life->modify();

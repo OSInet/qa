@@ -2,12 +2,14 @@
 
 namespace Drupal\qa;
 
+use Drupal\qa\Plugin\Qa\Control\BaseControl;
+
 /**
  * A control pass.
  */
 class Pass {
   /**
-   * The control of which this is a pass
+   * The control of which this is a pass.
    *
    * @var \Drupal\qa\Plugin\Qa\Control\BaseControl
    */
@@ -23,14 +25,14 @@ class Pass {
   public $account;
 
   /**
-   * The pass lifecycle
+   * The pass lifecycle.
    *
    * @var \Drupal\qa\Same
    */
   public $life;
 
   /**
-   * Success or failure
+   * Success or failure.
    *
    * @var int
    *   - NULL: undefined
@@ -40,16 +42,24 @@ class Pass {
   public $status;
 
   /**
-   * Render array for the results
+   * Dual-responsibility results accumulator.
    *
-   * @param array
+   * - While running checks, accumulates the results of each check
+   * - When returning from <Foo>Control::run, a rendered string.
+   *
+   * @var array|string
+   *
+   * TODO convert to Single Responsibility
    */
   public $result;
 
   /**
+   * Pass constructor.
+   *
    * @param \Drupal\qa\Plugin\Qa\Control\BaseControl $control
+   *   The control for which to run a Pass.
    */
-  function __construct($control) {
+  public function __construct(BaseControl $control) {
     $this->life = new Same();
     $this->status = NULL;
     $this->control = $control;
@@ -58,15 +68,14 @@ class Pass {
   }
 
   /**
-   * Record results from one of the checks in a control pass
+   * Record results from one of the checks in a control pass.
    *
    * @param array $check
+   *   Contains at least those keys:
    *   - status: 0 or 1
-   *   - result: render array
-   *
-   * @return void
+   *   - result: render array.
    */
-  function record($check) {
+  public function record(array $check) {
     if (!$check['status']) {
       $this->status = 0;
       if (isset($check['name'])) {
@@ -81,4 +90,5 @@ class Pass {
     }
     $this->life->modify();
   }
+
 }

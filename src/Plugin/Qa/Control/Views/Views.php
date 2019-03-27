@@ -11,7 +11,7 @@ abstract class Views extends BaseControl {
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('views'));
+    $ret = array_merge($ret, ['views']);
     return $ret;
   }
 }

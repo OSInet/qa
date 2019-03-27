@@ -2,7 +2,7 @@
 
 /**
  * @file
- * OSInet Quality Assurance module for Drupal
+ * OSInet Quality Assurance module for Drupal.
  *
  * @copyright Copyright (C) 2005-2018 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
  *
@@ -28,14 +28,17 @@ use Drupal\qa\Plugin\Qa\Control\BasePackage;
 use Drupal\qa\Plugin\Qa\Control\Variable\Variable;
 
 /**
- * Implements hook_init().
+ * Helper to access the module files.
  *
- * - add module CSS.
+ * @param string $extra
+ *   Optional. A module sub-component.
  *
- * TODO probabaly remove the CSS from here.
+ * @return string
+ *   The on-disk path.
  */
-function qa_init() {
-  drupal_add_css(drupal_get_path('module', 'qa') .'/qa.css');
+function _qa_get_path(string $extra = '') {
+  $qa = drupal_get_path('module', 'qa');
+  return implode('/', [$qa, $extra]);
 }
 
 /**
@@ -50,11 +53,12 @@ function qa_boot() {
 }
 
 /**
- * Legacy Dedicated autoloader for QA.
+ * Legacy (pre-PSR/4) Dedicated autoloader for QA.
  *
  * Only load symbols in the Drupal\qa namespace.
  *
  * @param string $name
+ *   The symbol to load.
  *
  * @deprecated
  */
@@ -67,10 +71,9 @@ function qa_autoload($name) {
     return;
   }
 
-  $module_path = drupal_get_path('module', 'qa');
   $path_array = explode('\\', $name);
   $filename = array_pop($path_array);
-  array_splice($path_array, 0, 2, [$module_path, 'src/Plugin/Qa/Control']);
+  array_splice($path_array, 0, 2, [_qa_get_path(), 'src/Plugin/Qa/Control']);
   $path = implode('/', $path_array);
   if (!is_dir($path) || !is_readable($path)) {
     $args = array('%path' => $path);
@@ -82,33 +85,38 @@ function qa_autoload($name) {
   $sts = include_once $path;
   $verbose && drupal_set_message(t('QA Autoloaded %path: @result', array(
     '%path' => $path,
-    '@result' => $sts ? t('Success'): t('Failure'),
+    '@result' => $sts ? t('Success') : t('Failure'),
   )));
 }
 
+/**
+ * Dedicated PSR/4 autoloader for this module.
+ *
+ * @param string $class
+ *   The name of the class to load.
+ *
+ * @see \qa_boot()
+ */
 function qa_autoload_psr4($class) {
-  // project-specific namespace prefix
+  // Project-specific namespace prefix.
   $prefix = 'Drupal\\qa\\';
 
-  // base directory for the namespace prefix
-  $base_dir = drupal_get_path('module', 'qa') . '/src/';
-
-  // does the class use the namespace prefix?
+  // Does the class use the QA namespace prefix ?
   $len = strlen($prefix);
   if (strncmp($prefix, $class, $len) !== 0) {
-    // no, move to the next registered autoloader
+    // No: move to the next registered autoloader.
     return;
   }
 
-  // get the relative class name
+  // Get the relative class name.
   $relative_class = substr($class, $len);
 
-  // replace the namespace prefix with the base directory, replace namespace
+  // Replace the namespace prefix with the base directory, replace namespace
   // separators with directory separators in the relative class name, append
-  // with .php
-  $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+  // with ".php".
+  $file = __DIR__ . '/src/' . str_replace('\\', '/', $relative_class) . '.php';
 
-  // if the file exists, require it
+  // If the file exists, require it.
   if (file_exists($file)) {
     require $file;
   }
@@ -172,27 +180,31 @@ function qa_menu() {
 }
 
 /**
- * Page callback for qa/dependencies
+ * Page callback for qa/dependencies.
  *
- * TODO convert to native Image_GraphViz to remove dependency on graphviz_filter
- * XXX convert to Grafizzi to remove dependency on Image_GraphViz
+ * TODO convert to Image_GraphViz to remove dependency on graphviz_filter.
+ * XXX convert to Grafizzi to remove dependency on Image_GraphViz.
  *
  * @return string
+ *   The dependencies graph, in DOT format.
  */
 function qa_page_dependencies() {
-  $G = qa_dependencies();
-  // passed by reference: cannot pass a function return
-  return graphviz_filter_render($G);
+  $graph = qa_dependencies();
+  // Passed by reference: cannot pass a function return.
+  return graphviz_filter_render($graph);
 }
 
 /**
  * Batch conclusion callback.
  *
- * @param boolean $success
+ * @param bool $success
+ *   Did the batch succeed ?
  * @param array $results
+ *   The accumulated batch results.
  * @param array $operations
+ *   The batch operations.
  */
-function qa_report_finished($success, $results, $operations) {
+function qa_report_finished(bool $success, array $results, array $operations) {
   unset($results['#message']);
   if ($success) {
     $message = format_plural(count($results), 'One control pass ran.', '@count control passes ran.');
@@ -214,38 +226,47 @@ function qa_report_results() {
   if (empty($_SESSION['qa_results'])) {
     drupal_goto('admin/reports/qa');
   }
-  // Work around incomplete classes
+  // Work around incomplete classes.
   $results = unserialize(serialize($_SESSION['qa_results']));
 
-  $header = array(
+  $header = [
     t('Control'),
     t('Status'),
     t('Results'),
-  );
-  $data = array();
+  ];
+  $data = [];
   foreach ($results as $pass) {
     $control = $pass->control;
-    $data[] = array(
+    $data[] = [
       $control->title,
       $pass->status
-        ? theme('image', array(
-          'path' => 'misc/watchdog-ok.png',
-          'alt' => t('OK'),
-          ))
-        : theme('image', array(
-          'path' => 'misc/watchdog-error.png',
-          'alt' => t('Error'),
-          )),
+      ? theme('image', [
+        'path' => 'misc/watchdog-ok.png',
+        'alt' => t('OK'),
+      ])
+      : theme('image', [
+        'path' => 'misc/watchdog-error.png',
+        'alt' => t('Error'),
+      ]),
       $pass->result,
-    );
+    ];
   }
-  $ret = theme('table', array(
-    'header' => $header,
-    'rows' => $data,
-    'attributes' => array(
+
+  $ret = [
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $data,
+    '#attributes' => [
       'id' => 'qa-results',
-    )));
-  // unset($_SESSION['qa_results']);
+    ],
+    '#attached' => [
+      'css' => [
+        _qa_get_path('qa.css'),
+      ],
+    ],
+  ];
+
+  // Do unset($_SESSION['qa_results']) to allow refreshing the results page.
   return $ret;
 }
 
@@ -253,11 +274,11 @@ function qa_report_results() {
  * Form builder for QA packages/controls selection form.
  *
  * @return array
+ *   The form array.
  */
-function qa_report_form($form, $form_state) {
+function qa_report_form(array $form, array $form_state) {
   $form = array();
-  $base = drupal_get_path('module', 'qa');
-  $packages = Exportable::getClasses($base, BasePackage::class);
+  $packages = Exportable::getClasses(_qa_get_path(), BasePackage::class);
   ksort($packages);
   foreach ($packages as $package_name => $package) {
     $collapsed = TRUE;
@@ -281,47 +302,49 @@ function qa_report_form($form, $form_state) {
       $met = TRUE;
       foreach ($control->getDependencies() as $dep_name) {
         if (module_exists($dep_name)) {
-          $deps[] = t('@module (<span class="admin-enabled">available</span>)', array('@module' => $dep_name));
+          $deps[] = t('@module (<span class="admin-enabled">available</span>)', ['@module' => $dep_name]);
         }
         else {
-          $deps[] = t('@module (<span class="admin-disabled">unavailable</span>)', array('@module' => $dep_name));
+          $deps[] = t('@module (<span class="admin-disabled">unavailable</span>)', ['@module' => $dep_name]);
           $met = FALSE;
         }
       }
-      $form[$package_name][$control_name] = array(
+      $form[$package_name][$control_name] = [
         '#type'          => 'checkbox',
         '#default_value' => $met ? $default_value : 0,
         '#title'         => filter_xss_admin($control->title),
         '#description'   => filter_xss_admin($control->description),
         '#disabled'      => !$met,
-      );
-      $form[$package_name][$control_name .'-dependencies'] = array(
-        '#value' => t('Depends on: !dependencies', array(
+      ];
+      $form[$package_name][$control_name . '-dependencies'] = [
+        '#value' => t('Depends on: !dependencies', [
           '!dependencies' => implode(', ', $deps),
-          )),
+        ]),
         '#prefix' => '<div class="admin-dependencies">',
         '#suffix' => '</div>',
-      );
+      ];
     }
     $form[$package_name]['#collapsed'] = $collapsed;
   }
 
-  $form['submit'] = array(
+  $form['submit'] = [
     '#type'  => 'submit',
     '#value' => t('Run controls'),
-  );
+  ];
 
   return $form;
 }
 
 /**
- * Submit handler for QA packages/controls selection form
+ * Submit handler for QA packages/controls selection form.
  *
  * @param array $form
+ *   The submitted form.
  * @param array $form_state
+ *   Its data.
  */
-function qa_report_form_submit($form, &$form_state) {
-  $controls = array();
+function qa_report_form_submit(array $form, array &$form_state) {
+  $controls = [];
   foreach ($form_state['values'] as $item => $value) {
     if (class_exists($item) && is_subclass_of($item, BaseControl::class)) {
       if ($value) {
@@ -338,16 +361,18 @@ function qa_report_form_submit($form, &$form_state) {
     }
   }
 
-  drupal_set_message(t('Prepare to run these controls: @controls', array(
-    '@controls' => implode(', ', array_keys($controls)))), 'status');
+  drupal_set_message(t('Prepare to run these controls: @controls', [
+    '@controls' => implode(', ', array_keys($controls)),
+  ]), 'status');
   $batch = array(
     'operations'       => array(),
     'title'            => t('QA Controls running'),
     'init_message'     => t('QA Controls initializing'),
-    // 'progress_message' => t('current: @current, Remaining: @remaining, Total: @total'),
+    // 'progress_message' =>
+    // t('current: @current, Remaining: @remaining, Total: @total'),
     'error_message'    => t('Error in QA Control'),
     'finished'         => 'qa_report_finished',
-    // 'file'             => '', // only if outside module file
+    // 'file'             => '', // only if outside module file.
   );
 
   foreach ($controls as $item => $value) {
@@ -358,8 +383,6 @@ function qa_report_form_submit($form, &$form_state) {
 
 /**
  * Batch progress step.
- *
- * @return void
  */
 function qa_report_run_pass($class_name, &$context) {
   $name_arg = array('@class' => $class_name);
@@ -383,6 +406,15 @@ function qa_report_run_pass($class_name, &$context) {
   }
 }
 
+/**
+ * Use a Drupal variable as a Variable instance if it is set.
+ *
+ * @param string $name
+ *   The name of the variable.
+ *
+ * @return bool|\Drupal\qa\Plugin\Qa\Control\Variable\Variable
+ *   An associated Variable instance, or FALSE if it does not exist.
+ */
 function qa_variable_load($name) {
   $variable = new Variable($name);
   if (!$variable->is_set) {

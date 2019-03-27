@@ -11,7 +11,7 @@ of your production database, configuration storage (D8) and file layout.
 
 It is designed to be extended by additional module implementing control classes.
 
-In D8, these are standard core plugins. In D7, these are derived from class 
+In D8, these are standard core plugins. In D7/D6, these are derived from 
 `Drupal\qa\Plugin\Qa\Control`, and are supported by a custom plugin system. 
 D7 uses a custom PSR-4 autoloader to match the D8 file layout to some extent. 
 
@@ -41,7 +41,7 @@ typically by piping the output like this:
 
 ## Availability per core version
 <table>
-  <caption>Porting status on 2018-01-20</caption>
+  <caption>Porting status on 2019-03-27</caption>
   <tr>
     <th>Package</th>
     <th>Control</th>
@@ -50,8 +50,14 @@ typically by piping the output like this:
     <th>Drupal/Pressflow 6</th>
     </tr>
   <tr>
-    <td>Cache</td>
+    <td rowspan="2">Cache</td>
     <td>Size</td>
+    <td>Not yet</td>
+    <td>OK</td>
+    <td>n.a.</td>
+    </tr>
+  <tr>
+    <td>Memcached</td>
     <td>Not yet</td>
     <td>OK</td>
     <td>n.a.</td>
@@ -73,7 +79,7 @@ typically by piping the output like this:
   <tr>
     <td rowspan="3">System</td>
     <td>Dependency (graph)</td>
-    <td>Not yet</td>
+    <td>OK</td>
     <td>OK</td>
     <td>OK</td>
     </tr>

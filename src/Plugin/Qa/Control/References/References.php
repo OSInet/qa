@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\References;
 
+use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
@@ -34,7 +35,7 @@ class References extends BaseControl {
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkNodes());
     $pass->life->modify();

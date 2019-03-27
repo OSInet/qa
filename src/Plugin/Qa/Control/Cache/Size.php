@@ -1,7 +1,11 @@
 <?php
 
+namespace Drupal\qa\Plugin\Qa\Control\Cache;
+
+use Drupal\qa\Pass;
+use Drupal\qa\Plugin\Qa\Control\BaseControl;
+
 /**
- * @file
  * OSInet QA Plugin for cache size.
  *
  * @copyright Copyright (C) 2011-2018 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
@@ -10,24 +14,24 @@
  *
  * @license Licensed under the disjunction of the CeCILL, version 2 and General Public License version 2 and later
  */
-
-namespace Drupal\qa\Plugin\Qa\Control\Cache;
-
-use Drupal\qa\Plugin\Qa\Control\BaseControl;
-
 class Size extends BaseControl {
-  const DATA_SIZE_LIMIT = 524288; // Memcache default entry limit: 1024*1024 * 0.5 for safety
+  // Memcache default entry limit: 1024*1024 * 0.5 for safety.
+  const DATA_SIZE_LIMIT = 524288;
+
   const DATA_SUMMARY_LENGTH = 1024;
 
   /**
+   * Check the size of entries in a given bin.
+   *
    * @param string $bin_name
+   *   The bin to check.
    *
    * @return array
    *   - name: the name of the checked bin
    *   - status: 0 for KO, 1 for OK
    *   - result: information in case of failed check.
    */
-  function checkBin($bin_name) {
+  public function checkBin($bin_name) {
     $ret = array(
       'name' => $bin_name,
     );
@@ -57,14 +61,14 @@ class Size extends BaseControl {
   /**
    * Check the contents of an existing and accessible bin.
    *
-   * @param $q
+   * @param \DatabaseStatementInterface $q
    *   The DBTNG query object for the bin contents, already queried.
    *
    * @return array
    *   - 0 : status bool
    *   - 1 : result array
    */
-  protected function checkBinContents($q) {
+  protected function checkBinContents(\DatabaseStatementInterface $q) {
     $status = TRUE;
     $result = array();
     foreach ($q->fetchAll() as $row) {
@@ -85,7 +89,7 @@ class Size extends BaseControl {
   }
 
   /**
-   * {@inheritdoc]
+   * {@inheritdoc}
    */
   public function init() {
     $this->package_name = __NAMESPACE__;
@@ -97,8 +101,10 @@ class Size extends BaseControl {
    * Does the passed schema match the expected cache schema structure ?
    *
    * @param array $schema
+   *   The schema being verified.
    *
    * @return bool
+   *   Does it pass ?
    */
   public static function isSchemaCache(array $schema) {
     $reference_schema_keys = array(
@@ -106,7 +112,7 @@ class Size extends BaseControl {
       'created',
       'data',
       'expire',
-      'serialized'
+      'serialized',
     );
     $keys = array_keys($schema['fields']);
     sort($keys);
@@ -115,6 +121,15 @@ class Size extends BaseControl {
     return $ret;
   }
 
+  /**
+   * Get the list of all cache bins.
+   *
+   * @param bool $rebuild
+   *   Rebuild the schema ?
+   *
+   * @return array
+   *   The schema array.
+   */
   public static function getAllBins($rebuild = FALSE) {
     $schema = drupal_get_complete_schema($rebuild);
     $ret = array();
@@ -128,7 +143,10 @@ class Size extends BaseControl {
     return $ret;
   }
 
-  function run() {
+  /**
+   * {@inheritdoc}
+   */
+  public function run(): Pass {
     $pass = parent::run();
     $bins = self::getAllBins(TRUE);
     foreach ($bins as $bin_name) {
@@ -138,16 +156,16 @@ class Size extends BaseControl {
 
     if ($pass->status) {
       $pass->result = format_plural(count($bins), '1 bin checked, not containing suspicious values',
-        '@count bins checked, none containing suspicious values', array());
+        '@count bins checked, none containing suspicious values', []);
     }
     else {
       $info = format_plural(count($bins), '1 view checked and containing suspicious values',
-        '@count bins checked, @bins containing suspicious values', array(
+        '@count bins checked, @bins containing suspicious values', [
           '@bins' => count($pass->result),
-        ));
+        ]);
 
-      // Prepare for theming
-      $result = array();
+      // Prepare for theming.
+      $result = [];
       // @XXX May be inconsistent with non-BMP strings ?
       uksort($pass->result, 'strcasecmp');
       foreach ($pass->result as $bin_name => $bin_report) {
@@ -156,26 +174,28 @@ class Size extends BaseControl {
           $result[] = $entry;
         }
       }
-      $header = array(
+      $header = [
         t('Bin'),
         t('CID'),
         t('Length'),
         t('Beginning of data'),
-      );
+      ];
 
-      $build = array(
-        'info' => array(
+      $build = [
+        'info' => [
           '#markup' => $info,
-        ),
-        'list' => array(
-          '#markup' => '<p>' . t('Checked: @checked', array('@checked' => implode(', ', $bins))) . "</p>\n",
-        ),
-        'table' => array(
+        ],
+        'list' => [
+          '#markup' => '<p>' . t('Checked: @checked', [
+            '@checked' => implode(', ', $bins),
+          ]) . "</p>\n",
+        ],
+        'table' => [
           '#theme' => 'table',
           '#header' => $header,
           '#rows' => $result,
-        )
-      );
+        ],
+      ];
       $pass->result = drupal_render($build);
     }
     return $pass;

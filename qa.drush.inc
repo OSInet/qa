@@ -9,7 +9,7 @@ use Drupal\qa\Plugin\Qa\Control\ForceRemoved;
 use Drupal\qa\Plugin\Qa\Control\System\ProjectsScanner;
 
 /**
- * Implementation of hook_drush_command().
+ * Implements hook_drush_command().
  */
 function qa_drush_command() {
   $items['qa-dependencies'] = [
@@ -43,8 +43,8 @@ function qa_drush_command() {
  */
 function drush_qa_dependencies() {
   module_load_include('inc', 'qa', 'qa_dependencies');
-  $G = qa_dependencies();
-  echo $G->parse();
+  $graph = qa_dependencies();
+  echo $graph->parse();
 }
 
 /**
@@ -68,14 +68,18 @@ function drush_qa_project_usage() {
 /**
  * Callback for uasort() in drush_qa_variables().
  *
- * @param $x
- * @param $y
+ * @param array $x
+ *   The left array to compare.
+ * @param array $y
+ *   The right array to compare.
+ *
  * @return int
+ *   As per uasort()
  *
  * @see \drush_qa_variables()
  */
-function _qa_drush_compare_variables($x, $y) {
-  return - ($x['len'] <=> $y['len']);
+function _qa_drush_compare_variables(array $x, array $y) {
+  return -($x['len'] <=> $y['len']);
 }
 
 /**

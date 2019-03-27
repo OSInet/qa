@@ -2,6 +2,8 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\Taxonomy;
 
+use Drupal\qa\Pass;
+
 /**
  * Find views containing PHP code
  */
@@ -52,7 +54,7 @@ sql;
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $vocabulary) {

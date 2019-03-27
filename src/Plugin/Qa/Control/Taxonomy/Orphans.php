@@ -2,6 +2,8 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\Taxonomy;
 
+use Drupal\qa\Pass;
+
 class Orphans extends Taxonomy {
 
   /**
@@ -53,7 +55,7 @@ sql;
     );
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkOrphans());
     $pass->life->end();

@@ -2,6 +2,8 @@
 
 namespace Drupal\qa\Plugin\Qa\Control\Views;
 
+use Drupal\qa\Pass;
+
 /**
  * Find views containing PHP code
  */
@@ -118,7 +120,7 @@ class Php extends Views {
     return $php;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
     foreach ($views as $view) {
