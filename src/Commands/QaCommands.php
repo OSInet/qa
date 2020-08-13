@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Drupal\qa\Commands;
 
@@ -76,6 +77,33 @@ class QaCommands extends DrushCommands {
     $qaDep = \Drupal::service('qa.dependencies');
     $G = $qaDep->build();
     echo $G->build();
+  }
+
+  /**
+   * Show projects entirely unused and unused themes.
+   *
+   * @command qa:system:unused
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function system_unused() {
+    /** @var \Drupal\qa\Plugin\QaCheckManager $qam */
+    $qam = \Drupal::service('plugin.manager.qa_check');
+    $unused = $qam->createInstance('system.unused_extensions');
+    $pass = $unused->run();
+    $res = [
+      'age' => $pass->life->age(),
+      'ok' => $pass->ok,
+      'result' => [],
+    ];
+    /** @var \Drupal\qa\Result $result */
+    foreach ($pass->result as $key => $result) {
+      $res['result'][$key] = [
+        'ok' => $result->ok,
+        'data' => $result->data,
+      ];
+    }
+    $this->output->writeln(Yaml::dump($res, 4, 2));
   }
 
   /**

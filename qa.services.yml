@@ -10,6 +10,6 @@ services:
   qa.dependencies:
     class: Drupal\qa\Dependencies
     arguments:
-      - '@theme_handler'
       - '@extension.list.module'
+      - '@extension.list.theme'
       - '@logger.channel.qa'

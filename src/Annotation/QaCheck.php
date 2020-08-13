@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Drupal\qa\Annotation;
 
@@ -31,4 +32,12 @@ class QaCheck extends Plugin {
    */
   public $label;
 
+  /**
+   * The details about the plugin.
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
+   */
+  public $details;
 }

@@ -19,18 +19,18 @@ class References extends BaseControl {
   }
 
   function checkNodes() {
-    $ret = array('status' => 1, 'result' => array());
+    $ret = ['status' => 1, 'result' => []];
     return $ret;
   }
 
   function checkUsers() {
-    $ret = array('status' => 1, 'result' => array());
+    $ret = ['status' => 1, 'result' => []];
     return $ret;
   }
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('content', 'nodereference', 'userreference'));
+    $ret = array_merge($ret, ['content', 'nodereference', 'userreference']);
     return $ret;
   }
 

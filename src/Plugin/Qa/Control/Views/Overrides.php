@@ -17,20 +17,21 @@ class Overrides extends Views {
     $status = $view->type == t('Default') ? 1 : 0;
     if (!$status) {
       $name = empty($view->human_name) ? $view->name : $view->human_name;
-      $result = array(
+      $result = [
           module_exists('views_ui')
           ? l($name, "admin/structure/views/view/{$view->name}/edit")
           : $name,
-          $view->type);
+          $view->type
+      ];
     }
     else {
       $result = NULL;
     }
-    $ret = array(
+    $ret = [
       'name'   => $view->name,
       'status' => $status,
       'result' => $result,
-    );
+    ];
     return $ret;
   }
 
@@ -43,16 +44,16 @@ class Overrides extends Views {
     $pass->life->end();
 
     // Prepare for theming
-    $result = array();
+    $result = [];
     // @XXX May be inconsistent with non-BMP strings ?
     uksort($pass->result, 'strcasecmp');
     foreach ($pass->result as $view_report) {
-      $result[] = t('!view: @type', array(
+      $result[] = t('!view: @type', [
         '!view' => $view_report[0], // Built safe in self::checkViewPhp
         '@type' => $view_report[1],
-      ));
+      ]);
     }
-    $result = theme('item_list', array('items' => $result));
+    $result = theme('item_list', ['items' => $result]);
     $pass->result = $result;
     return $pass;
   }

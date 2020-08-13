@@ -3,6 +3,7 @@
 namespace Drupal\qa;
 
 use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Grafizzi\Graph\Attribute;
 use Grafizzi\Graph\Cluster;
@@ -37,19 +38,19 @@ class Dependencies {
   protected $pimple;
 
   /**
-   * @var \Drupal\Core\Extension\ThemeHandlerInterface
+   * @var \Drupal\Core\Extension\ThemeExtensionList
    */
-  protected $themeHandler;
+  protected $themeExtensionList;
 
   public function __construct(
-    ThemeHandlerInterface $themeHandler,
     ModuleExtensionList $moduleExtensionList,
+    ThemeExtensionList $themeExtensionList,
     LoggerInterface $logger
   ) {
     $this->logger = $logger;
     $this->moduleExtensionList = $moduleExtensionList;
+    $this->themeExtensionList = $themeExtensionList;
     $this->pimple = new Container(['logger' => $logger]);
-    $this->themeHandler = $themeHandler;
 
     $this->font = $this->attr("fontsize", 10);
   }
@@ -174,23 +175,19 @@ class Dependencies {
     $engineLine = $this->attr('style', 'dotted');
     $baseLine = $this->attr('style', 'dashed');
 
-    $themeList = $this->themeHandler->listInfo();
+    $themeList = $this->themeExtensionList->getAllAvailableInfo();
     krsort($themeList);
 
     $engines = [];
     $themes = [];
 
     foreach ($themeList as $theme => $detail) {
-      if (empty($detail->status)) {
-        continue;
-      }
-
       // Build theme engine links.
       $themes[$theme] = $from = $this->node($theme, [$this->font, $themeShape]);
       $g->addChild($from);
-      if (!empty($detail->owner)) {
+      if (!empty($detail['engine'])) {
         // D8 still theoretically supports multiple engines (e.g. nyan_cat).
-        $engine = basename($detail->owner); // with extension
+        $engine = basename($detail['engine']); // with extension
         $engineBase = basename($engine, '.engine');
         if (!isset($engines[$engineBase])) {
           $engines[$engineBase] = $engineNode = $this->node($engineBase, [
@@ -207,7 +204,7 @@ class Dependencies {
       }
 
       // Build base theme links.
-      $toName = $detail->base_theme ?? '';
+      $toName = $detail['base theme'] ?? '';
       if (!empty($toName)) {
         $to = $themes[$toName];
         if (empty($to)) {
@@ -225,7 +222,7 @@ class Dependencies {
     // @see https://wiki.php.net/rfc/pipe-operator
     $g = $this->initGraph();
     $g = $this->buildModules($g);
-    //$g = $this->buildTheming($g);
+    $g = $this->buildTheming($g);
     return $g;
   }
 

@@ -7,7 +7,7 @@ namespace Drupal\qa;
  */
 abstract class BasePackage extends Exportable {
 
-  protected static $instances = array();
+  protected static $instances = [];
 
   public static function getInstance() {
     $name = get_called_class();

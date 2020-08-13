@@ -1,24 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\qa;
 
+use Drupal\qa\Plugin\QaCheckInterface;
+use Drupal\user\Entity\User;
+
 /**
- * A control pass.
+ * Pass represents the results of a QaCheck run, aka a "Pass" in a check suite.
  */
 class Pass {
+
   /**
-   * The control of which this is a pass
+   * The QaCheck instance of which this is a pass
    *
-   * @var \Drupal\qa\BaseControl
+   * @var \Drupal\qa\Plugin\QaCheckInterface
    */
-  public $control;
+  public $check;
 
   /**
    * The user who ran the pass.
    *
-   * This is normally a stdClass with a $uid public member.
-   *
-   * @var object
+   * @var \Drupal\user\UserInterface
    */
   public $account;
 
@@ -30,55 +34,45 @@ class Pass {
   public $life;
 
   /**
-   * Success or failure
+   * Did all steps succeed ?
    *
-   * @var int
-   *   - NULL: undefined
-   *   - 0: failure
-   *   - 1: success
+   * @var bool
    */
-  public $status;
+  public $ok;
 
   /**
-   * Render array for the results
+   * Serializable array for the results
    *
    * @param array
    */
   public $result;
 
   /**
-   * @param \Drupal\qa\BaseControl $control
+   * @param \Drupal\qa\Plugin\QaCheckInterface $check
    */
-  function __construct($control) {
+  function __construct(QaCheckInterface $check) {
     $this->life = new Same();
-    $this->status = NULL;
-    $this->control = $control;
-    $this->account = $GLOBALS['user'];
-    $this->result = array();
+    $this->ok = TRUE;
+    $this->check = $check;
+    $this->account = $GLOBALS['user'] ?? User::getAnonymousUser();
+    $this->result = [];
   }
 
   /**
    * Record results from one of the checks in a control pass
    *
-   * @param array $check
+   * @param Result $checkResult
    *   - status: 0 or 1
    *   - result: render array
    *
    * @return void
    */
-  function record($check) {
-    if (!$check['status']) {
-      $this->status = 0;
-      if (isset($check['name'])) {
-        $this->result[$check['name']] = $check['result'];
-      }
-      else {
-        $this->result[] = $check['result'];
-      }
+  function record(Result $checkResult) {
+    if (!$checkResult->ok) {
+      $this->ok = FALSE;
     }
-    elseif (!isset($this->status)) {
-      $this->status = 1;
-    }
+    $this->result[$checkResult->name] = $checkResult;
     $this->life->modify();
   }
+
 }

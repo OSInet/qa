@@ -17,7 +17,7 @@ class Project {
   /**
    * @var \Drupal\qa\System\Module[]
    */
-  public $modules = array();
+  public $modules = [];
   public $name;
 
   public function __construct($name)  {
