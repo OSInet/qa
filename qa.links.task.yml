@@ -1,7 +1,7 @@
-qa.reports.controls:
-  route_name: 'qa.reports.controls'
+qa.reports.checks:
+  route_name: 'qa.reports.checks'
   base_route: 'qa.reports'
-  title: 'Controls'
+  title: 'Checks'
   weight: 0
 
 qa.reports.dependencies:

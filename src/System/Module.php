@@ -23,8 +23,8 @@ class Module {
   public $status;
   public $schema_version;
   public $weight = 0;
-  public $required_by = array();
-  public $requires = array();
+  public $required_by = [];
+  public $requires = [];
   public $sort;
 
   public static function createFromCore(Extension $object) {
@@ -51,10 +51,10 @@ class Module {
   public static function getInfo()  {
     $module_data = system_rebuild_module_data();
     /** @var Module[] $modules */
-    $modules = array();
+    $modules = [];
 
     /** @var Project[] $projects */
-    $projects = array();
+    $projects = [];
 
     foreach ($module_data as $name => $info) {
       $module = Module::createFromCore($info);
@@ -75,10 +75,10 @@ class Module {
     }
     ksort($projects);
 
-    return array(
+    return [
       $modules,
       $projects,
-    );
+    ];
   }
 
   public function __toString() {

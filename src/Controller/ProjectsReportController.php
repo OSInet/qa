@@ -111,7 +111,8 @@ class ProjectsReportController extends ControllerBase {
     $bc[] = l($this->t('Variables'), 'admin/reports/qa/variable');
     drupal_set_breadcrumb($bc);
 
-    drupal_set_title($this->t('Variable: %name', array('%name' => $variable->name)), PASS_THROUGH);
+    drupal_set_title($this->t('Variable: %name', ['%name' => $variable->name]),
+      PASS_THROUGH);
     return $variable->dump();
   }
 
@@ -133,23 +134,21 @@ class ProjectsReportController extends ControllerBase {
     $ret .= kprint_r($projects, TRUE);
 
     $ret .= '<h3>Modules info</h3>';
-    list($modules, $projects) = Module::getInfo();
+    [$modules, $projects] = Module::getInfo();
 
-    $header = array(
+    $header = [
       $this->t('Project'),
       $this->t('Module'),
       $this->t('Module status'),
       $this->t('Project status'),
-    );
+    ];
 
-    $rows = array();
+    $rows = [];
     $previous_project = '';
     /** @var \Drupal\qa\System\Project $project */
     foreach ($projects as $name => $project) {
-      $row = array();
-      $project_cell = array(
-        'data' => $name,
-      );
+      $row = [];
+      $project_cell = ['data' => $name,];
       $count = $project->useCount();
       if ($count > 1) {
         //$project_cell['rowspan'] = $count;
@@ -163,7 +162,7 @@ class ProjectsReportController extends ControllerBase {
 
       /** @var \Drupal\qa\System\Module $module */
       foreach (array_values($project->modules) as $index => $module) {
-        $row = array();
+        $row = [];
         $row[] = ($index === 0) ? $project_cell : '';
 
         $row[] = $module->name;
@@ -171,10 +170,10 @@ class ProjectsReportController extends ControllerBase {
 
         if ($index === 0) {
           if ($count === 0) {
-            $last_cell = array(
+            $last_cell = [
               'style' => 'background-color: #ff8080',
               'data' => $count,
-            );
+            ];
           }
           else {
             $last_cell = $count;
@@ -188,9 +187,9 @@ class ProjectsReportController extends ControllerBase {
         $rows[] = $row;
       }
     }
-    return theme('table', array(
+    return theme('table', [
       'header' => $header,
       'rows' => $rows,
-    ));
+    ]);
   }
 }

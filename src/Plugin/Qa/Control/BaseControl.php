@@ -30,14 +30,14 @@ abstract class BaseControl extends Exportable {
    *
    * @var array
    */
-  protected static $instances = array();
+  protected static $instances = [];
 
   /**
    * Per-package list of instances
    *
    * @var array
    */
-  protected static $packages = array();
+  protected static $packages = [];
 
   public function __construct() {
     parent::__construct();
@@ -50,9 +50,12 @@ abstract class BaseControl extends Exportable {
    * @return array
    */
   public static function getDependencies() {
-    return array();
+    return [];
   }
 
+  /**
+   * @return \Drupal\qa\BaseControl
+   */
   public static function getInstance() {
     $name = get_called_class();
     if (!isset(self::$instances[$name])) {
@@ -60,10 +63,10 @@ abstract class BaseControl extends Exportable {
       self::$instances[$name] = $instance;
       if (!isset(self::$packages[$instance->package_name])) {
         $package = new $instance->package_name();
-        self::$packages[get_class($package)] = array(
+        self::$packages[get_class($package)] = [
           'package' => $package,
-          'controls' => array(),
-        );
+          'controls' => [],
+        ];
       }
       self::$packages[$instance->package_name]['controls'][$instance->name] = $instance;
     }

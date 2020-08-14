@@ -32,20 +32,21 @@ ORDER BY 1, 2
 sql;
     $q = db_query($sq, $languages);
     // No db_rewrite_sql: this needs to be unhindered by any access control
-    $vars = array();
+    $vars = [];
     while ($o = db_fetch_object($q)) {
       $vars[$o->name][] = $o->language;
     }
 
-    $items = array();
+    $items = [];
     foreach ($vars as $name => $var_languages) {
-      $items[] = t('@var: @languages', array('@var' => $name, '@languages' => implode(', ', $var_languages)));
+      $items[] = t('@var: @languages',
+        ['@var' => $name, '@languages' => implode(', ', $var_languages)]);
     }
-    $ret = array(
-      'name'   => 'extra',
+    $ret = [
+      'name' => 'extra',
       'status' => empty($vars) ? 1 : 0,
-      'result' => array('extra' => $items)
-    );
+      'result' => ['extra' => $items],
+    ];
     return $ret;
   }
 
@@ -63,30 +64,31 @@ ORDER BY 1, 2
 sql;
     $q = db_query($sq, $languages);
     // No db_rewrite_sql: this needs to be unhindered by any access control
-    $vars = array();
+    $vars = [];
     while ($o = db_fetch_object($q, $ph)) {
       $vars[$o->name][] = $o->language;
     }
 
-    $items = array();
+    $items = [];
     foreach ($vars as $name => $var_languages) {
       $missing = array_diff($languages, $var_languages);
       if (!empty($missing)) {
-        $items[] = t('@var: @languages', array('@var' => $name, '@languages' => implode(', ', $missing)));
+        $items[] = t('@var: @languages',
+          ['@var' => $name, '@languages' => implode(', ', $missing)]);
       }
     }
 
-    $ret = array(
-      'name'   => 'missing',
+    $ret = [
+      'name' => 'missing',
       'status' => empty($items) ? 1 : 0,
-      'result' => array('missing' => $items),
-    );
+      'result' => ['missing' => $items],
+    ];
     return $ret;
   }
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('i18n')); // introduces {i18n_variable}
+    $ret = array_merge($ret, ['i18n']); // introduces {i18n_variable}
     return $ret;
   }
 
@@ -98,28 +100,25 @@ sql;
     $pass->life->end();
 
     $extra_row = empty($pass->result['extra']['extra'])
-      ? array(array(
-          'data' => t('No extra translation found'),
-          'colspan' => 2,
-          ),
-        )
-      : array(
-          t('Extra translations'),
-          theme('item_list', $pass->result['extra']['extra'])
-        );
+      ? [['data' => t('No extra translation found'), 'colspan' => 2,]]
+      : [
+        t('Extra translations'),
+        theme('item_list', $pass->result['extra']['extra']),
+      ];
 
     $missing_row = empty($pass->result['missing']['missing'])
-      ? array(array(
+      ? [
+        [
           'data' => t('No missing translation found'),
           'colspan' => 2,
-          ),
-        )
-      : array(
-          t('Missing translations'),
-          theme('item_list', $pass->result['missing']['missing'])
-        );
+        ],
+      ]
+      : [
+        t('Missing translations'),
+        theme('item_list', $pass->result['missing']['missing']),
+      ];
 
-    $rows = array($extra_row, $missing_row);
+    $rows = [$extra_row, $missing_row];
     $pass->result = theme('table', NULL, $rows);
     return $pass;
   }

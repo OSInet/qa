@@ -30,7 +30,7 @@ class Php extends Views {
    *   The array of PHP fragments found in the area.
    */
   protected function checkViews2Php($area, array $php, $display, $area_name) {
-    $ret = array();
+    $ret = [];
     $area_format = $display->display_options[$area_name .'_format']; // Always set
     if (in_array($area_format, $php)) {
       $ret['text'] = $area;
@@ -48,7 +48,7 @@ class Php extends Views {
    *   The array of PHP fragments found in the area.
    */
   protected function checkViews3Php(array $area, array $php) {
-    $ret = array();
+    $ret = [];
     foreach ($area as $field => $field_options) {
       if ($field_options['field'] == 'area' && isset($field_options['format']) && in_array($field_options['format'], $php)) {
         $ret[$field] = $field_options['content'];
@@ -62,8 +62,8 @@ class Php extends Views {
    */
   public function checkViewPhp($view) {
     $php = $this->getPhpFormats();
-    $areas = array('header', 'footer', 'empty');
-    $result = array();
+    $areas = ['header', 'footer', 'empty'];
+    $result = [];
 
     foreach ($view->display as $display_name => $display) {
       foreach ($areas as $area_name) {
@@ -82,11 +82,11 @@ class Php extends Views {
       } // foreach header, footer, empty...
     } // foreach display
 
-    $ret = array(
+    $ret = [
       'name' => $view->name,
       'status' => empty($result),
       'result' => $result,
-    );
+    ];
     return $ret;
   }
 
@@ -100,12 +100,12 @@ class Php extends Views {
 
     if (!isset($php) || $reset) {
       $formats = filter_formats();
-      $php = array();
+      $php = [];
       foreach ($formats as $format) {
-        $filters = filter_list_format($format->format);
+        $filters = filter_list_format($format->id());
         foreach ($filters as $filter) {
           if ($filter->module == 'php') {
-            $php[] = $format->format;
+            $php[] = $format->id();
             break;
           }
         }
@@ -124,28 +124,28 @@ class Php extends Views {
 
     if ($pass->status) {
       $result = format_plural(count($views), '1 view checked, none containing PHP',
-        '@count views checked, none containing PHP', array());
+        '@count views checked, none containing PHP', []);
     }
     else {
       $result = format_plural(count($views), '1 view checked and containing PHP',
-        '@count views checked, @php containing PHP', array(
+        '@count views checked, @php containing PHP', [
           '@php' => count($pass->result),
-      ));
-      $header = array(
+        ]);
+      $header = [
         t('View'),
         t('Display'),
         t('Area'),
         t('Field'),
         t('Content'),
-      );
-      $data = array();
+      ];
+      $data = [];
       foreach ($pass->result as $view_name => $displays) {
-        $row = array();
+        $row = [];
         $link_title = empty($views[$view_name]->human_name)
           ? $view_name
           : $views[$view_name]->human_name;
         $view_link = l($link_title, "admin/structure/views/view/$view_name/edit");
-        $row['view'] = array('data' => $view_link);
+        $row['view'] = ['data' => $view_link];
         foreach ($displays as $display_id => $areas) {
           $row['display'] = l($display_id, "admin/structure/views/view/$view_name/edit/$display_id");
           foreach ($areas as $area_name => $fields) {
@@ -153,22 +153,22 @@ class Php extends Views {
             foreach ($fields as $field => $content) {
               $row['field'] = l($field,
                 'admin/structure/views/nojs/config-item/'. $view_name .'/'. $display_id .'/'. $area_name .'/'. $field,
-                array('query' => array('destination' => 'admin/reports/qa/results'))
+                ['query' => ['destination' => 'admin/reports/qa/results']]
               );
-              $row['content'] = array(
+              $row['content'] = [
                 'data'  => '<pre>'. check_plain($content) .'</pre>',
                 'class' => 'pre',
-              );
+              ];
               $data[$view_name .'/'. $display_id .'/'. $area_name .'/'. $field] = $row;
             }
           }
         }
       }
       ksort($data);
-      $result .= theme('table', array(
+      $result .= theme('table', [
         'header' => $header,
         'rows' => $data,
-      ));
+      ]);
     }
     $pass->result = $result;
     return $pass;

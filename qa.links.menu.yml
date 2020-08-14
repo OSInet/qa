@@ -4,11 +4,11 @@ qa.reports:
   description: 'Access the various QA reports'
   route_name: 'qa.reports'
 
-qa.reports.controls:
-  title: 'Controls'
+qa.reports.checks:
+  title: 'Checks'
   parent: qa.reports
-  description: 'Access the list of available QA batch controls'
-  route_name: 'qa.reports.controls'
+  description: 'Access the list of available QA checks'
+  route_name: 'qa.reports.checks'
 
 qa.reports.dependencies:
   title: 'Dependencies'

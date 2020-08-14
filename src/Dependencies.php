@@ -3,7 +3,7 @@
 namespace Drupal\qa;
 
 use Drupal\Core\Extension\ModuleExtensionList;
-use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Extension\ThemeExtensionList;
 use Grafizzi\Graph\Attribute;
 use Grafizzi\Graph\Cluster;
 use Grafizzi\Graph\Edge;
@@ -12,60 +12,85 @@ use Grafizzi\Graph\Node;
 use Pimple\Container;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class Dependencies supports building the dependency graph for extensions.
+ */
 class Dependencies {
   const SHAPE_THEME = 'octagon';
   const SHAPE_ENGINE = 'doubleoctagon';
 
   /**
+   * The current drawing font.
+   *
    * @var \Grafizzi\Graph\Attribute
    */
   protected $font;
 
   /**
+   * A logger service.
+   *
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
   /**
+   * The extension_list.module service.
+   *
    * @var \Drupal\Core\Extension\ModuleExtensionList
    */
   protected $moduleExtensionList;
 
   /**
+   * The container used by Grafizzi.
+   *
    * @var \Pimple\Container
    */
   protected $pimple;
 
   /**
-   * @var \Drupal\Core\Extension\ThemeHandlerInterface
+   * The extension_list.theme service.
+   *
+   * @var \Drupal\Core\Extension\ThemeExtensionList
    */
-  protected $themeHandler;
+  protected $themeExtensionList;
 
+  /**
+   * Dependencies constructor.
+   *
+   * @param \Drupal\Core\Extension\ModuleExtensionList $moduleExtensionList
+   *   The extension_list.module service.
+   * @param \Drupal\Core\Extension\ThemeExtensionList $themeExtensionList
+   *   The extension_list.theme service.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger service.
+   */
   public function __construct(
-    ThemeHandlerInterface $themeHandler,
     ModuleExtensionList $moduleExtensionList,
+    ThemeExtensionList $themeExtensionList,
     LoggerInterface $logger
   ) {
     $this->logger = $logger;
     $this->moduleExtensionList = $moduleExtensionList;
+    $this->themeExtensionList = $themeExtensionList;
     $this->pimple = new Container(['logger' => $logger]);
-    $this->themeHandler = $themeHandler;
 
     $this->font = $this->attr("fontsize", 10);
   }
-
 
   /**
    * Clone of function _graphviz_create_filepath() from graphviz_filter.module.
    *
    * @param string $path
+   *   The path were to create the graph.
    * @param string $filename
+   *   The name of the graph file.
    *
    * @return string
+   *   The complet graph path.
    */
   public function graphvizCreateFilepath($path, $filename) {
     if (!empty($path)) {
-      return rtrim($path, '/') .'/'. $filename;
+      return rtrim($path, '/') . "/${filename}";
     }
     return $filename;
   }
@@ -73,15 +98,31 @@ class Dependencies {
   /**
    * Facade for Grafizzi Attribute constructor.
    *
-   * @param $name
-   * @param $value
+   * @param string $name
+   *   The name of the Attribute to create.
+   * @param string $value
+   *   The value of the Attribute to create.
    *
    * @return \Grafizzi\Graph\Attribute
+   *   The created Attribute.
    */
   public function attr(string $name, string $value) : Attribute {
     return new Attribute($this->pimple, $name, $value);
   }
 
+  /**
+   * Facade for Grafizzi Edge constructor.
+   *
+   * @param \Grafizzi\Graph\Node $from
+   *   The edge origin (tail).
+   * @param \Grafizzi\Graph\Node $to
+   *   The edge destination (head).
+   * @param array $attrs
+   *   The attributes to add to the edge.
+   *
+   * @return \Grafizzi\Graph\Edge
+   *   The created Edge.
+   */
   public function edge(Node $from, Node $to, array $attrs) : Edge {
     return new Edge($this->pimple, $from, $to, $attrs);
   }
@@ -92,9 +133,12 @@ class Dependencies {
    * Strips the optional "namespace" (aka project or package) part of the name.
    *
    * @param string $name
+   *   The name of the node to create.
    * @param \Grafizzi\Graph\Attribute[] $attrs
+   *   The attributes to add to the node.
    *
    * @return \Grafizzi\Graph\Node
+   *   The created Node.
    */
   public function node(string $name, array $attrs = []) : Node {
     // Strip the "namespace" part.
@@ -110,8 +154,12 @@ class Dependencies {
    * Facade for Grafizzi Cluster constructor.
    *
    * @param string $name
+   *   The name of the cluster subgraph to create.
+   * @param array $attrs
+   *   The attributes to add to the subgraph.
    *
    * @return \Grafizzi\Graph\Cluster
+   *   The created cluster subgraph.
    */
   public function cluster(string $name, array $attrs = []): Cluster {
     return new Cluster($this->pimple, urlencode($name), [
@@ -119,6 +167,12 @@ class Dependencies {
     ] + $attrs);
   }
 
+  /**
+   * Initialize a Grafizzi graph.
+   *
+   * @return \Grafizzi\Graph\Graph
+   *   The created Graph.
+   */
   protected function initGraph() : Graph {
     $g = new Graph($this->pimple, "deps", [
       $this->attr("rankdir", "RL"),
@@ -127,6 +181,15 @@ class Dependencies {
     return $g;
   }
 
+  /**
+   * Build the modules dependency graph.
+   *
+   * @param \Grafizzi\Graph\Graph $g
+   *   The Graph within which to draw.
+   *
+   * @return \Grafizzi\Graph\Graph
+   *   The modified Graph.
+   */
   public function buildModules(Graph $g) : Graph {
     $modules = $this->moduleExtensionList->reset()->getList();
     krsort($modules);
@@ -168,29 +231,35 @@ class Dependencies {
     return $g;
   }
 
+  /**
+   * Build the themes dependency graph.
+   *
+   * @param \Grafizzi\Graph\Graph $g
+   *   The Graph within which to draw.
+   *
+   * @return \Grafizzi\Graph\Graph
+   *   The modified Graph.
+   */
   protected function buildTheming(Graph $g) : Graph {
     $engineShape = $this->attr('shape', static::SHAPE_ENGINE);
     $themeShape = $this->attr('shape', static::SHAPE_THEME);
     $engineLine = $this->attr('style', 'dotted');
     $baseLine = $this->attr('style', 'dashed');
 
-    $themeList = $this->themeHandler->listInfo();
+    $themeList = $this->themeExtensionList->getAllAvailableInfo();
     krsort($themeList);
 
     $engines = [];
     $themes = [];
 
     foreach ($themeList as $theme => $detail) {
-      if (empty($detail->status)) {
-        continue;
-      }
-
       // Build theme engine links.
       $themes[$theme] = $from = $this->node($theme, [$this->font, $themeShape]);
       $g->addChild($from);
-      if (!empty($detail->owner)) {
+      if (!empty($detail['engine'])) {
         // D8 still theoretically supports multiple engines (e.g. nyan_cat).
-        $engine = basename($detail->owner); // with extension
+        // XXX Name used to include the extension. Play it safe for now.
+        $engine = basename($detail['engine']);
         $engineBase = basename($engine, '.engine');
         if (!isset($engines[$engineBase])) {
           $engines[$engineBase] = $engineNode = $this->node($engineBase, [
@@ -207,7 +276,7 @@ class Dependencies {
       }
 
       // Build base theme links.
-      $toName = $detail->base_theme ?? '';
+      $toName = $detail['base theme'] ?? '';
       if (!empty($toName)) {
         $to = $themes[$toName];
         if (empty($to)) {
@@ -221,11 +290,17 @@ class Dependencies {
     return $g;
   }
 
+  /**
+   * Build the complete dependency graph.
+   *
+   * @return \Grafizzi\Graph\Graph
+   *   The created Graph object. Render it with Grafizzi\Graph\Graph::build().
+   */
   public function build() : Graph {
     // @see https://wiki.php.net/rfc/pipe-operator
     $g = $this->initGraph();
     $g = $this->buildModules($g);
-    //$g = $this->buildTheming($g);
+    $g = $this->buildTheming($g);
     return $g;
   }
 

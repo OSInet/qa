@@ -16,7 +16,7 @@ abstract class Taxonomy extends BaseControl {
 
   static function getDependencies() {
     $ret = parent::getDependencies();
-    $ret = array_merge($ret, array('taxonomy'));
+    $ret = array_merge($ret, ['taxonomy']);
     return $ret;
   }
 }

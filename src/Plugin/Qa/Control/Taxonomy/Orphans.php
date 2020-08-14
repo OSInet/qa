@@ -31,10 +31,10 @@ WHERE td.tid IS NULL
 sql;
     // No node access: we are scanning the whole database for a fully privileged user.
     $q = db_query($sq);
-    $orphans = array(
-      'terms' => array(),
-      'nodes' => array(),
-    );
+    $orphans = [
+      'terms' => [],
+      'nodes' => [],
+    ];
     foreach ($q->fetchAll() as $o) {
       if (is_null($o->tdtid)) {
         $orphans['terms'][] = $o->titid;
@@ -47,10 +47,10 @@ sql;
     sort($orphans['terms']);
     $orphans['nodes'] = array_unique($orphans['nodes']);
     sort($orphans['nodes']);
-    return array(
+    return [
       'status' => (empty($orphans['terms']) && empty($orphans['nodes'])) ? 1 : 0,
       'result' => $orphans,
-    );
+    ];
   }
 
   function run() {
@@ -60,14 +60,14 @@ sql;
 
     // Prepare for theming. Only one pass for this check.
     $result = isset($pass->result[0]) ? $pass->result[0] : NULL;
-    $result = array(
+    $result = [
       empty($result['terms'])
         ? t('All terms found')
-        : t('Missing term IDs: @tids', array('@tids' => implode(', ', $result['terms']))),
+        : t('Missing term IDs: @tids', ['@tids' => implode(', ', $result['terms'])]),
       empty($result['nodes'])
         ? t('All nodes found')
-        : t('Missing nodes: @nids', array('@nids' => implode(', ', $result['nodes']))),
-    );
+        : t('Missing nodes: @nids', ['@nids' => implode(', ', $result['nodes'])]),
+    ];
     $result = theme('item_list', $result);
     $pass->result = $result;
     return $pass;

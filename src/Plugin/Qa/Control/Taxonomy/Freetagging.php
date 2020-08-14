@@ -32,23 +32,23 @@ WHERE
   td.vid = :vid AND tn.nid IS NULL
 sql;
     // no db_rewrite_sql(): we are checking the whole database
-    $q = db_query($sq, array(':vid' => $vocabulary->vid));
-    $result = array(
+    $q = db_query($sq, [':vid' => $vocabulary->vid]);
+    $result = [
       'vocabulary' => $vocabulary,
-      'terms' => array(),
-    );
+      'terms' => [],
+    ];
 
     foreach ($q->fetchAll() as $o) {
       $term = taxonomy_term_load($o->tid); // has an internal cache, so we may loop
-      $result['terms'][$term->tid] = l($term->name, 'admin/content/taxonomy/edit/term/'. $term->tid, array(
-        'query' => array('destination' => 'admin/reports/qa/result'),
-      ));
+      $result['terms'][$term->tid] = l($term->name, 'admin/content/taxonomy/edit/term/'. $term->tid, [
+        'query' => ['destination' => 'admin/reports/qa/result'],
+      ]);
     }
-    $ret = array(
+    $ret = [
       'name'   => $vocabulary->name,
       'status' => empty($result['terms']) ? 1 : 0,
       'result' => $result,
-    );
+    ];
     return $ret;
   }
 
@@ -67,10 +67,10 @@ sql;
     uksort($pass->result, 'strcasecmp'); // @XXX May be inconsistent with non-BMP strings ?
     foreach ($pass->result as $vocabulary_name => $info) {
       $vocabulary_link = l($vocabulary_name, 'admin/content/taxonomy/'. $info['vocabulary']->vid);
-      $result[] = t('!link: !terms', array(
+      $result[] = t('!link: !terms', [
         '!link' => $vocabulary_link,
         '!terms' => implode(', ', $info['terms']),
-      ));
+      ]);
     }
     $result = empty($result)
       ? t('All tags are in use')
