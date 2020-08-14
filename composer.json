@@ -9,7 +9,7 @@
     "extra": {
         "drush": {
             "services": {
-                "drush.services.yml": "^9"
+                "drush.services.yml": "^9 || ^10"
             }
         }
     },
@@ -17,7 +17,7 @@
     "minimum-stability": "dev",
     "name": "osinet/qa",
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.3",
         "osinet/grafizzi": "^0.0.2"
     },
     "type": "drupal-module"

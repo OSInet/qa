@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\qa\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
@@ -13,12 +15,12 @@ interface QaCheckInterface extends PluginInspectionInterface {
   // The default result set: empty and successful.
   const DEFAULT_RESULT = ['status' => 0];
 
-  // Add get/set methods for your plugin type here.
-
   /**
    * Run the check on the current site.
    *
    * @return \Drupal\qa\Pass
+   *   The results wrapped in Pass information.
    */
   public function run(): Pass;
+
 }

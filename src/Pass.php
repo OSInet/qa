@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\qa;
 
 use Drupal\qa\Plugin\QaCheckInterface;
-use Drupal\user\Entity\User;
 
 /**
  * Pass represents the results of a QaCheck run, aka a "Pass" in a check suite.
@@ -13,21 +12,14 @@ use Drupal\user\Entity\User;
 class Pass {
 
   /**
-   * The QaCheck instance of which this is a pass
+   * The QaCheck instance of which this is a pass.
    *
    * @var \Drupal\qa\Plugin\QaCheckInterface
    */
   public $check;
 
   /**
-   * The user who ran the pass.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  public $account;
-
-  /**
-   * The pass lifecycle
+   * The pass lifecycle.
    *
    * @var \Drupal\qa\Same
    */
@@ -41,33 +33,35 @@ class Pass {
   public $ok;
 
   /**
-   * Serializable array for the results
+   * Serializable array for the results.
    *
-   * @param array
+   * @var array
    */
   public $result;
 
   /**
+   * Pass constructor.
+   *
    * @param \Drupal\qa\Plugin\QaCheckInterface $check
+   *   A check on which to report.
    */
-  function __construct(QaCheckInterface $check) {
+  public function __construct(QaCheckInterface $check) {
     $this->life = new Same();
     $this->ok = TRUE;
     $this->check = $check;
-    $this->account = $GLOBALS['user'] ?? User::getAnonymousUser();
     $this->result = [];
   }
 
   /**
-   * Record results from one of the checks in a control pass
+   * Record results from one of the checks in a control pass.
    *
-   * @param Result $checkResult
-   *   - status: 0 or 1
-   *   - result: render array
-   *
-   * @return void
+   * @param Result|null $checkResult
+   *   A check result to store.
    */
-  function record(Result $checkResult) {
+  public function record(?Result $checkResult) {
+    if (empty($checkResult)) {
+      return;
+    }
     if (!$checkResult->ok) {
       $this->ok = FALSE;
     }

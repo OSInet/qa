@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types = 1);
 
 namespace Drupal\qa\Commands;
 
 use Drupal\qa\Controller\WorkflowsReportController;
+use Drupal\qa\Plugin\QaCheck\References\Integrity;
+use Drupal\qa\Plugin\QaCheck\System\UnusedExtensions;
+use Drupal\qa\Plugin\QaCheckManager;
 use Drupal\qa\Workflows\ContentModerationGraph;
 use Drupal\qa\Workflows\ContentModerationGrid;
 use Drush\Commands\DrushCommands;
@@ -24,8 +28,24 @@ use Symfony\Component\Yaml\Yaml;
 class QaCommands extends DrushCommands {
 
   /**
-   * Show the content moderation as a table.
+   * The plugin.manager.qa_check service.
    *
+   * @var \Drupal\qa\Plugin\QaCheckManager
+   */
+  protected $qam;
+
+  /**
+   * QaCommands constructor.
+   *
+   * @param \Drupal\qa\Plugin\QaCheckManager $qam
+   *   The plugin.manager.qa_check service.
+   */
+  public function __construct(QaCheckManager $qam) {
+    $this->qam = $qam;
+  }
+
+  /**
+   * Show the content moderation as a table.
    *
    * @command como:table
    * @aliases cmt,como-table
@@ -38,21 +58,19 @@ class QaCommands extends DrushCommands {
   /**
    * Show the content moderation as a Graphviz DOT file.
    *
-   * @param $workflow
-   *   The machine name of a workflow
+   * @param string $workflow
+   *   The machine name of a workflow.
    *
    * @command como:graphviz
    * @aliases cmg,como-graphviz
    */
-  public function graphviz($workflow = NULL) {
+  public function graphviz(string $workflow = '') {
     $graph = ContentModerationGraph::create(\Drupal::getContainer());
     echo $graph->report();
   }
 
-
   /**
-   * Show a summary of available workflows
-   *
+   * Show a summary of available workflows.
    *
    * @command qa:workflows-list
    * @aliases qawl,qa-workflows-list
@@ -68,15 +86,39 @@ class QaCommands extends DrushCommands {
   /**
    * Build a Graphviz DOT file showing the module and theme dependencies.
    *
-   *
    * @command qa:dependencies
    * @aliases qadep,qa-dependencies
    */
   public function dependencies() {
     /** @var \Drupal\qa\Dependencies $qaDep */
     $qaDep = \Drupal::service('qa.dependencies');
-    $G = $qaDep->build();
-    echo $G->build();
+    $g = $qaDep->build();
+    echo $g->build();
+  }
+
+  /**
+   * Show broken entity_reference fields.
+   *
+   * @command qa:references:integrity
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function referencesIntegrity() {
+    $check = $this->qam->createInstance(Integrity::NAME);
+    $pass = $check->run();
+    $res = [
+      'age' => $pass->life->age(),
+      'ok' => $pass->ok,
+      'result' => [],
+    ];
+    /** @var \Drupal\qa\Result $result */
+    foreach ($pass->result as $key => $result) {
+      $res['result'][$key] = [
+        'ok' => $result->ok,
+        'data' => $result->data,
+      ];
+    }
+    $this->output->writeln(Yaml::dump($res, 4, 2));
   }
 
   /**
@@ -86,11 +128,9 @@ class QaCommands extends DrushCommands {
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function system_unused() {
-    /** @var \Drupal\qa\Plugin\QaCheckManager $qam */
-    $qam = \Drupal::service('plugin.manager.qa_check');
-    $unused = $qam->createInstance('system.unused_extensions');
-    $pass = $unused->run();
+  public function systemUnused() {
+    $check = $this->qam->createInstance(UnusedExtensions::NAME);
+    $pass = $check->run();
     $res = [
       'age' => $pass->life->age(),
       'ok' => $pass->ok,
@@ -108,7 +148,6 @@ class QaCommands extends DrushCommands {
 
   /**
    * List extensions removed without a clean uninstall.
-   *
    *
    * @command qa:force-removed
    * @aliases qafrm,qa-force-removed

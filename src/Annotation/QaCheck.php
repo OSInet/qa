@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Drupal\qa\Annotation;
 
@@ -14,7 +15,6 @@ use Drupal\Component\Annotation\Plugin;
  * @Annotation
  */
 class QaCheck extends Plugin {
-
 
   /**
    * The plugin ID.
@@ -39,5 +39,20 @@ class QaCheck extends Plugin {
    *
    * @ingroup plugin_translatable
    */
-  public $details;
+  public $details = '';
+
+  /**
+   * This plugin uses a batch process.
+   *
+   * @var bool
+   */
+  public $usesBatch = FALSE;
+
+  /**
+   * The number of steps this plugin goes through during a run.
+   *
+   * @var int
+   */
+  public $steps = 1;
+
 }

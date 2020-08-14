@@ -26,14 +26,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @QaCheck(
  *   id = "system.unused_extensions",
- *   label=@Translation("System: unused non-core extensions"),
- *   details=@Translation("Unused modules and themes present on disk can
- *   represent a useless cost on most dimensions. Packages entirely unused
- *   should usually be removed. This does not necessarily hold in a multi-site
- *   filesystem layout.")
+ *   label=@Translation("Unused non-core extensions"),
+ *   details=@Translation("Unused modules and themes present on disk can represent a useless cost on most dimensions. Packages entirely unused should usually be removed. This does not necessarily hold in a multi-site filesystem layout."),
+ *   usesBatch=false,
+ *   steps=2,
  * )
  */
 class UnusedExtensions extends QaCheckBase implements QaCheckInterface {
+  const NAME = 'system.unused_extensions';
 
   /**
    * Extension doesn't have a package clause.

@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Drupal\qa;
 
@@ -35,12 +36,16 @@ class Result {
    * Result constructor.
    *
    * @param string $name
-   * @param bool $status
-   * @param null $data
+   *   The name of the sub-check for which this is a result.
+   * @param bool $ok
+   *   Did that sub-check succeed ?
+   * @param mixed $data
+   *   Serializable sub-check results.
    */
-  public function __construct(string $name, bool $status, $data = NULL) {
+  public function __construct(string $name, bool $ok, $data = NULL) {
     $this->name = $name;
-    $this->ok = $status;
+    $this->ok = $ok;
     $this->data = $data;
   }
+
 }

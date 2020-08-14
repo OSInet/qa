@@ -1,5 +1,7 @@
 services:
   qa.commands:
     class: \Drupal\qa\Commands\QaCommands
+    arguments:
+      - '@plugin.manager.qa_check'
     tags:
       - { name: drush.command }

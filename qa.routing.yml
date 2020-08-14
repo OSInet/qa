@@ -6,11 +6,11 @@ qa.reports:
   requirements:
     _permission: 'access site reports'
 
-qa.reports.controls:
+qa.reports.checks:
   path: '/admin/reports/qa/list'
   defaults:
-    _controller: '\Drupal\qa\Controller\ControlsListController::report'
-    _title: 'QA Controls'
+    _controller: '\Drupal\qa\Controller\CheckListController::report'
+    _title: 'QA Checks'
   requirements:
     _permission: 'access site reports'
 
