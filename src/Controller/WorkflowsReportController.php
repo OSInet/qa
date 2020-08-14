@@ -68,7 +68,7 @@ class WorkflowsReportController extends ControllerBase {
       'sinkNodes' => 0,
     ];
 
-    /** @var ContentModerationStateInterface $state */
+    /** @var \Drupal\content_moderation\Entity\ContentModerationStateInterface $state */
     foreach ($workflow->getStates() as $state) {
       $id = $state->id();
       $maybeIsland = FALSE;
@@ -127,7 +127,7 @@ class WorkflowsReportController extends ControllerBase {
    * @return array
    *   A table cell array.
    */
-  protected function buildControlCell($workflow, $key) {
+  protected function buildControlCell(array $workflow, $key) {
     $value = $workflow[$key] ?? 0;
     $cell = $value
       ? ['class' => 'qa-results__ko']

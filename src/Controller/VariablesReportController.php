@@ -1,13 +1,13 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\qa\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 
 /**
  * Class VariablesReportController.
- *
- * @package Drupal\qa\Controller
  */
 class VariablesReportController extends ControllerBase {
 
@@ -24,6 +24,15 @@ class VariablesReportController extends ControllerBase {
     ];
   }
 
+  /**
+   * Placeholder controller for "variables".
+   *
+   * @param string $qaVariable
+   *   The variable name.
+   *
+   * @return array
+   *   A render array.
+   */
   public function view($qaVariable) {
     return [
       '#type' => 'markup',

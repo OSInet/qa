@@ -6,8 +6,6 @@ use Drupal\Core\Controller\ControllerBase;
 
 /**
  * Class DependenciesReportController.
- *
- * @package Drupal\qa\Controller
  */
 class DependenciesReportController extends ControllerBase {
 
@@ -24,6 +22,15 @@ class DependenciesReportController extends ControllerBase {
     ];
   }
 
+  /**
+   * Placeholder controller for "dependencies".
+   *
+   * @param string $qaVariable
+   *   The variable name.
+   *
+   * @return array
+   *   A render array.
+   */
   public function view($qaVariable) {
     return [
       '#type' => 'markup',

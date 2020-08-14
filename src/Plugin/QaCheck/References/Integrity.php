@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\qa\Plugin\QaCheck\References;
 
@@ -37,12 +37,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class Integrity extends QaCheckBase implements QaCheckInterface {
+
   const NAME = 'references.integrity';
 
   const STEP_ER = 'entity_reference';
+
   const STEP_FILE = 'file';
+
   const STEP_IMAGE = 'image';
+
   const STEP_ERR = 'entity_reference_revisions';
+
   const STEP_DER = 'dynamic_entity_reference';
 
   /**
@@ -124,45 +129,17 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
   }
 
   /**
-   * Build a map of entity_reference fields per entity_type.
+   * @param array $fieldMap
    *
    * @return array
-   *   The map.
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
-  protected function getEntityReferenceFields(): array {
-    $fscStorage = $this->storages['field_storage_config'];
-    $defs = $fscStorage->loadMultiple();
-    $fields = [];
-    /** @var \Drupal\field\FieldStorageConfigInterface $fsc */
-    foreach ($defs as $fsc) {
-      if ($fsc->getType() !== self::STEP_ER) {
-        continue;
-      }
-      $et = $fsc->getTargetEntityTypeId();
-      $name = $fsc->getName();
-      $target = $fsc->getSetting('target_type');
-      // XXX hard-coded knowledge. Maybe refactor once multiple types are used.
-      // $prop = $fsc->getMainPropertyName();
-      if (!isset($fields[$et])) {
-        $fields[$et] = [];
-      }
-      $fields[$et][$name] = $target;
-    }
-    return $fields;
-  }
-
-  /**
-   * Verifies integrity of entity_reference forward links.
-   *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
-   */
-  public function checkEntityReference(): Result {
-    $fieldMap = $this->getEntityReferenceFields();
+  protected function checkForward(array $fieldMap): array {
     $checks = [];
     foreach ($fieldMap as $et => $fields) {
       $checks[$et] = [
-        // <id> => [ <field_name> => <target_id> ],
+        // Eventual result of a broken reference:
+        // <id> => [ <field_name> => <target_id> ].
       ];
       $entities = $this->storages[$et]->loadMultiple();
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
@@ -179,16 +156,29 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
           $checks[$et][$entity->id()][$name] = [];
           /** @var \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem $value */
           foreach ($target as $delta => $value) {
+            // Happens with DER.
+            if (is_array($targetET)) {
+              $targetType = $value->toArray()['target_type'];
+              // A fail here would be a severe case where content was not migrated after a schema change.
+              $deltaTargetET = in_array($targetType,
+                $targetET) ? $targetType : '';
+            }
+            else {
+              $deltaTargetET = $targetET;
+            }
+
             $targetID = $value->toArray()[EntityReferenceItem::mainPropertyName()];
-            foreach ($entity->referencedEntities() as $targetEntity) {
-              $x = $targetEntity->getEntityTypeId();
-              if ($x != $targetET) {
-                continue;
-              }
-              // Target found, next delta.
-              $x = $targetEntity->id();
-              if ($x === $targetID) {
-                continue 2;
+            if (!empty($deltaTargetET)) {
+              foreach ($entity->referencedEntities() as $targetEntity) {
+                $x = $targetEntity->getEntityTypeId();
+                if ($x != $deltaTargetET) {
+                  continue;
+                }
+                // Target found, next delta.
+                $x = $targetEntity->id();
+                if ($x === $targetID) {
+                  continue 2;
+                }
               }
             }
             // Target not found: broken reference.
@@ -206,27 +196,48 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
         unset($checks[$et]);
       }
     }
-    return new Result(self::STEP_ER, empty($checks), $checks);
+    return $checks;
+  }
+
+  public function checkReferenceType(string $step): Result {
+    $fieldMap = $this->getFields($step);
+    $checks = $this->checkForward($fieldMap);
+    return new Result($step, empty($checks), $checks);
   }
 
   /**
-   * Verifies integrity of dynamic_entity_reference forward links.
+   * Get reference fields of the selected type.
    *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
-   */
-  public function checkDynamicEntityReference(): ?Result {
-    return NULL;
-  }
-
-  /**
-   * Verifies entity_reference_revisions forward and backward links.
+   * @param string $refType
+   *   The field type.
    *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
+   * @return array
+   *   A field by entity type map.
    */
-  public function checkEntityReferenceRevisions(): ?Result {
-    return NULL;
+  protected function getFields(string $refType): array {
+    $fscStorage = $this->storages['field_storage_config'];
+    $defs = $fscStorage->loadMultiple();
+    $fields = [];
+    /** @var \Drupal\field\FieldStorageConfigInterface $fsc */
+    foreach ($defs as $fsc) {
+      if ($fsc->getType() !== $refType) {
+        continue;
+      }
+      $et = $fsc->getTargetEntityTypeId();
+      $name = $fsc->getName();
+      $target = $fsc->getSetting('target_type');
+      if (empty($target)) {
+        // Dynamic Entity Reference allows multiple target entity types.
+        $target = array_values($fsc->getSetting('entity_type_ids'));
+      }
+      // XXX hard-coded knowledge. Maybe refactor once multiple types are used.
+      // $prop = $fsc->getMainPropertyName();
+      if (!isset($fields[$et])) {
+        $fields[$et] = [];
+      }
+      $fields[$et][$name] = $target;
+    }
+    return $fields;
   }
 
   /**
@@ -234,11 +245,18 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
    */
   public function run(): Pass {
     $pass = parent::run();
-    $pass->record($this->checkEntityReference());
-    $pass->life->modify();
-    $pass->record($this->checkDynamicEntityReference());
-    $pass->life->modify();
-    $pass->record($this->checkEntityReferenceRevisions());
+
+    $steps = [
+      self::STEP_ER,
+      self::STEP_ERR,
+      self::STEP_DER,
+      self::STEP_FILE,
+      self::STEP_IMAGE,
+    ];
+    foreach ($steps as $step) {
+      $pass->record($this->checkReferenceType($step));
+      $pass->life->modify();
+    }
     $pass->life->end();
     return $pass;
   }
