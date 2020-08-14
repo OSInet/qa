@@ -64,7 +64,13 @@ typically by piping the output like this:
   <tr>
     <td>References</td>
     <td>References</td>
-    <td>OK: ER</td>
+    <td>OK:<ul>
+    <li>file</li>
+    <li>image</li>
+    <li>ER</li>
+    <li>ERR</li>
+    <li>DER</li>
+    </ul></td>
     <td></td>
     <td></td>
     </tr>
@@ -135,4 +141,3 @@ typically by piping the output like this:
     <td>WIP</td>
     </tr>
   </table>
-

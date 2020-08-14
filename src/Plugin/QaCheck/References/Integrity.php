@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\qa\Plugin\QaCheck\References;
 
@@ -37,12 +37,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class Integrity extends QaCheckBase implements QaCheckInterface {
+
   const NAME = 'references.integrity';
 
   const STEP_ER = 'entity_reference';
+
   const STEP_FILE = 'file';
+
   const STEP_IMAGE = 'image';
+
   const STEP_ERR = 'entity_reference_revisions';
+
   const STEP_DER = 'dynamic_entity_reference';
 
   /**
@@ -155,8 +160,10 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
             if (is_array($targetET)) {
               $targetType = $value->toArray()['target_type'];
               // A fail here would be a severe case where content was not migrated after a schema change.
-              $deltaTargetET = in_array($targetType, $targetET) ? $targetType : '';
-            } else {
+              $deltaTargetET = in_array($targetType,
+                $targetET) ? $targetType : '';
+            }
+            else {
               $deltaTargetET = $targetET;
             }
 
@@ -192,40 +199,10 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
     return $checks;
   }
 
-  /**
-   * Verifies integrity of entity_reference forward links.
-   *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
-   */
-  public function checkEntityReference(): Result {
-    $fieldMap = $this->getFields(self::STEP_ER);
+  public function checkReferenceType(string $step): Result {
+    $fieldMap = $this->getFields($step);
     $checks = $this->checkForward($fieldMap);
-    return new Result(self::STEP_ER, empty($checks), $checks);
-  }
-
-  /**
-   * Verifies integrity of dynamic_entity_reference forward links.
-   *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
-   */
-  public function checkDynamicEntityReference(): ?Result {
-    $fieldMap = $this->getFields(self::STEP_DER);
-    $checks = $this->checkForward($fieldMap);
-    return new Result(self::STEP_DER, empty($checks), $checks);
-  }
-
-  /**
-   * Verifies entity_reference_revisions forward and backward links.
-   *
-   * @return \Drupal\qa\Result
-   *   The sub-check results.
-   */
-  public function checkEntityReferenceRevisions(): ?Result {
-    $fieldMap = $this->getFields(self::STEP_ERR);
-    $checks = $this->checkForward($fieldMap);
-    return new Result(self::STEP_ERR, empty($checks), $checks);
+    return new Result($step, empty($checks), $checks);
   }
 
   /**
@@ -268,11 +245,18 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
    */
   public function run(): Pass {
     $pass = parent::run();
-    $pass->record($this->checkEntityReference());
-    $pass->life->modify();
-    $pass->record($this->checkDynamicEntityReference());
-    $pass->life->modify();
-    $pass->record($this->checkEntityReferenceRevisions());
+
+    $steps = [
+      self::STEP_ER,
+      self::STEP_ERR,
+      self::STEP_DER,
+      self::STEP_FILE,
+      self::STEP_IMAGE,
+    ];
+    foreach ($steps as $step) {
+      $pass->record($this->checkReferenceType($step));
+      $pass->life->modify();
+    }
     $pass->life->end();
     return $pass;
   }
