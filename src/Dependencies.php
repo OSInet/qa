@@ -34,7 +34,7 @@ class Dependencies {
   protected $logger;
 
   /**
-   * The extension_list.module service.
+   * The extension.list.module service.
    *
    * @var \Drupal\Core\Extension\ModuleExtensionList
    */
@@ -48,7 +48,7 @@ class Dependencies {
   protected $pimple;
 
   /**
-   * The extension_list.theme service.
+   * The extension.list.theme service.
    *
    * @var \Drupal\Core\Extension\ThemeExtensionList
    */
@@ -58,9 +58,9 @@ class Dependencies {
    * Dependencies constructor.
    *
    * @param \Drupal\Core\Extension\ModuleExtensionList $moduleExtensionList
-   *   The extension_list.module service.
+   *   The extension.list.module service.
    * @param \Drupal\Core\Extension\ThemeExtensionList $themeExtensionList
-   *   The extension_list.theme service.
+   *   The extension.list.theme service.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger service.
    */
