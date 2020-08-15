@@ -62,8 +62,8 @@ typically by piping the output like this:
     <td>OK</td>
     </tr>
   <tr>
-    <td>References</td>
-    <td>References</td>
+    <td rowspan="2">References</td>
+    <td>Integrity</td>
     <td>OK:<ul>
     <li>file</li>
     <li>image</li>
@@ -73,6 +73,12 @@ typically by piping the output like this:
     </ul></td>
     <td></td>
     <td></td>
+    </tr>
+  <tr>
+    <td>Taxonomy Index</td>
+    <td>OK</td>
+    <td></td>
+    <td>OK</td>
     </tr>
   <tr>
     <td rowspan="3">System</td>
@@ -94,14 +100,8 @@ typically by piping the output like this:
     <td></td>
     </tr>
   <tr>
-    <td rowspan="2">Taxonomy</td>
+    <td>Taxonomy</td>
     <td>Freetagging</td>
-    <td>Planned</td>
-    <td></td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td>Orphans</td>
     <td>Planned</td>
     <td></td>
     <td>OK</td>

@@ -18,6 +18,7 @@
     "name": "osinet/qa",
     "require": {
         "php": ">=7.3",
+        "drupal/core": "^8 || ^9",
         "osinet/grafizzi": "^0.0.2"
     },
     "type": "drupal-module"

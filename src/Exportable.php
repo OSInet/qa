@@ -2,7 +2,10 @@
 
 namespace Drupal\qa;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+
 abstract class Exportable {
+  use StringTranslationTrait;
 
   /**
    * The directory containing the file containing this class.

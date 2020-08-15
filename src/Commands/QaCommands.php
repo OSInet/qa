@@ -6,6 +6,7 @@ namespace Drupal\qa\Commands;
 
 use Drupal\qa\Controller\WorkflowsReportController;
 use Drupal\qa\Plugin\QaCheck\References\Integrity;
+use Drupal\qa\Plugin\QaCheck\References\TaxonomyIndex;
 use Drupal\qa\Plugin\QaCheck\System\UnusedExtensions;
 use Drupal\qa\Plugin\QaCheckManager;
 use Drupal\qa\Workflows\ContentModerationGraph;
@@ -97,14 +98,15 @@ class QaCommands extends DrushCommands {
   }
 
   /**
-   * Show broken entity_reference fields.
+   * Command helper: runs a QaCheck plugin and display its results.
    *
-   * @command qa:references:integrity
+   * @param string $name
+   *   The plugin name.
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function referencesIntegrity() {
-    $check = $this->qam->createInstance(Integrity::NAME);
+  public function runPlugin(string $name): void {
+    $check = $this->qam->createInstance($name);
     $pass = $check->run();
     $res = [
       'age' => $pass->life->age(),
@@ -122,6 +124,28 @@ class QaCommands extends DrushCommands {
   }
 
   /**
+   * Show broken entity_reference fields.
+   *
+   * @command qa:references:integrity
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function referencesIntegrity() {
+    $this->runPlugin(Integrity::NAME);
+  }
+
+  /**
+   * Show broken taxonomy_index data.
+   *
+   * @command qa:references:taxonomy_index
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function referencesTaxonomyIndex() {
+    $this->runPlugin(TaxonomyIndex::NAME);
+  }
+
+  /**
    * Show projects entirely unused and unused themes.
    *
    * @command qa:system:unused
@@ -129,21 +153,7 @@ class QaCommands extends DrushCommands {
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   public function systemUnused() {
-    $check = $this->qam->createInstance(UnusedExtensions::NAME);
-    $pass = $check->run();
-    $res = [
-      'age' => $pass->life->age(),
-      'ok' => $pass->ok,
-      'result' => [],
-    ];
-    /** @var \Drupal\qa\Result $result */
-    foreach ($pass->result as $key => $result) {
-      $res['result'][$key] = [
-        'ok' => $result->ok,
-        'data' => $result->data,
-      ];
-    }
-    $this->output->writeln(Yaml::dump($res, 4, 2));
+    $this->runPlugin(UnusedExtensions::NAME);
   }
 
   /**

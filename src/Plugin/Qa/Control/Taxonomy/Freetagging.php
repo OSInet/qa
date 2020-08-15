@@ -2,10 +2,26 @@
 
 namespace Drupal\qa\Taxonomy;
 
+use Drupal\qa\BaseControl;
+
 /**
  * Find views containing PHP code
  */
-class Freetagging extends Taxonomy {
+class Freetagging extends BaseControl {
+
+  /**
+   * {@inheritdoc]
+   */
+  public function __construct() {
+    parent::__construct();
+    $this->package_name = __NAMESPACE__;
+  }
+
+  public static function getDependencies() {
+    $ret = BaseControl::getDependencies();
+    $ret = array_merge($ret, ['taxonomy']);
+    return $ret;
+  }
 
   /**
    * {@inheritdoc]
