@@ -18,22 +18,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * It covers core entity_reference only.
  *
- * Future versions are expected to cover
- * - core: file
- * - core: image
- * - contrib: entity_reference_revisions, notably used by paragraphs.
- * - contrib: dynamic_entity_reference
- *
- * For entity_reference_revisions, it will check references both up and down
- * the
- * parent/child chain.
- *
  * @QaCheck(
  *   id = "references.integrity",
- *   label=@Translation("Referential integrity"),
- *   details=@Translation("This check finds broken entity references. Missing
- *   nodes or references mean broken links and a bad user experience. These
- *   should usually be edited."), usesBatch=true, steps=3,
+ *   label = @Translation("Referential integrity"),
+ *   details = @Translation("This check finds broken entity references. Missing nodes or references mean broken links and a bad user experience. These should usually be edited."),
+ *   usesBatch = false,
+ *   steps = 3,
  * )
  */
 class Integrity extends QaCheckBase implements QaCheckInterface {
