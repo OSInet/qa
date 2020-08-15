@@ -80,6 +80,7 @@ class TaxonomyIndex extends QaCheckBase implements QaCheckInterface {
    * Locate {taxonomy_index} entries linking to a missing term or node.
    *
    * @return \Drupal\qa\Result
+   *   The check result.
    */
   public function checkIndex(): Result {
     $sql = <<<SQL
@@ -92,7 +93,7 @@ FROM {taxonomy_index} ti
 WHERE tfd.tid IS NULL
   OR nfd.nid IS NULL
 SQL;
-    // No node access: we are scanning the whole database for a fully privileged user.
+    // No node access: we are scanning the whole database with full privileges.
     $q = $this->db->query($sql);
     $missing = [
       self::KEY_TERMS => [],
@@ -134,4 +135,3 @@ SQL;
   }
 
 }
-

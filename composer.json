@@ -21,5 +21,8 @@
         "drupal/core": "^8 || ^9",
         "osinet/grafizzi": "^0.0.2"
     },
-    "type": "drupal-module"
+    "type": "drupal-module",
+    "require-dev": {
+        "nikic/php-parser": "^4.8@dev"
+    }
 }

@@ -1,6 +1,8 @@
 services:
   plugin.manager.qa_check:
     class: Drupal\qa\Plugin\QaCheckManager
+    arguments:
+      - '@kernel'
     parent: default_plugin_manager
 
   logger.channel.qa:

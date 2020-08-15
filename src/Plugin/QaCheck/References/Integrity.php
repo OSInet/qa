@@ -119,9 +119,14 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
   }
 
   /**
+   * Check entity references in the passed reference map.
+   *
    * @param array $fieldMap
+   *   A map of fields by entity type.
    *
    * @return array
+   *   A map of broken references.
+   *
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
    */
   protected function checkForward(array $fieldMap): array {
@@ -149,7 +154,8 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
             // Happens with DER.
             if (is_array($targetET)) {
               $targetType = $value->toArray()['target_type'];
-              // A fail here would be a severe case where content was not migrated after a schema change.
+              // A fail here would be a severe case where content was not
+              // migrated after a schema change.
               $deltaTargetET = in_array($targetType,
                 $targetET) ? $targetType : '';
             }
@@ -189,10 +195,21 @@ class Integrity extends QaCheckBase implements QaCheckInterface {
     return $checks;
   }
 
-  public function checkReferenceType(string $step): Result {
-    $fieldMap = $this->getFields($step);
+  /**
+   * Perform a reference integrity check of the specified kind.
+   *
+   * @param string $kind
+   *   The reference kind.
+   *
+   * @return \Drupal\qa\Result
+   *   The check result.
+   *
+   * @throws \Drupal\Core\TypedData\Exception\MissingDataException
+   */
+  public function checkReferenceType(string $kind): Result {
+    $fieldMap = $this->getFields($kind);
     $checks = $this->checkForward($fieldMap);
-    return new Result($step, empty($checks), $checks);
+    return new Result($kind, empty($checks), $checks);
   }
 
   /**

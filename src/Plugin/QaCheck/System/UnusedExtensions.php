@@ -60,7 +60,7 @@ class UnusedExtensions extends QaCheckBase implements QaCheckInterface {
   protected $elm;
 
   /**
-   * The extension_list.theme service.
+   * The extension.list.theme service.
    *
    * @var \Drupal\Core\Extension\ThemeExtensionList
    */
@@ -78,9 +78,9 @@ class UnusedExtensions extends QaCheckBase implements QaCheckInterface {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The config.factory service.
    * @param \Drupal\Core\Extension\ModuleExtensionList $elm
-   *   The extension_list.module service.
+   *   The extension.list.module service.
    * @param \Drupal\Core\Extension\ThemeExtensionList $elt
-   *   The extension_list.theme service.
+   *   The extension.list.theme service.
    */
   public function __construct(
     array $configuration,

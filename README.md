@@ -55,14 +55,7 @@ typically by piping the output like this:
     <td></td>
     </tr>
   <tr>
-    <td>I18N</td>
-    <td>Variables</td>
-    <td></td>
-    <td></td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td rowspan="2">References</td>
+    <td rowspan="3">References</td>
     <td>Integrity</td>
     <td>OK:<ul>
     <li>file</li>
@@ -75,17 +68,29 @@ typically by piping the output like this:
     <td></td>
     </tr>
   <tr>
+    <td>External code</td>
+    <td>OK</td>
+    <td></td>
+    <td></td>
+    </tr>
+  <tr>
     <td>Taxonomy Index</td>
     <td>OK</td>
     <td></td>
     <td>OK</td>
     </tr>
   <tr>
-    <td rowspan="3">System</td>
+    <td rowspan="4">System</td>
     <td>Dependency (graph)</td>
     <td>OK</td>
     <td>OK</td>
     <td>OK</td>
+    </tr>
+  <tr>
+    <td>Undeclared dependencies</td>
+    <td>OK</td>
+    <td></td>
+    <td></td>
     </tr>
   <tr>
     <td>Unused</td>
@@ -107,16 +112,22 @@ typically by piping the output like this:
     <td>OK</td>
     </tr>
   <tr>
-    <td>Variables</td>
+    <td rowspan="2">Variables</td>
     <td>Size</td>
-    <td>Not applicable</td>
+    <td>n.a.</td>
     <td>OK</td>
     <td></td>
     </tr>
   <tr>
+    <td>I18N</td>
+    <td>n.a.</td>
+    <td></td>
+    <td>OK</td>
+    </tr>
+  <tr>
     <td rowspan="2">Views</td>
     <td>Override</td>
-    <td>Not applicable</td>
+    <td>n.a.</td>
     <td>OK</td>
     <td>OK</td>
     </tr>
@@ -130,7 +141,7 @@ typically by piping the output like this:
     <td rowspan="4">Workflows (Content Moderation)</td>
     <td>Summary</td>
     <td>OK</td>
-    <td colspan="2" rowspan="3">Not applicable</td>
+    <td colspan="2" rowspan="3">n.a.</td>
     </tr>
   <tr>
     <td>Transition (graph)</td>

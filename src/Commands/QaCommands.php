@@ -5,8 +5,10 @@ declare(strict_types = 1);
 namespace Drupal\qa\Commands;
 
 use Drupal\qa\Controller\WorkflowsReportController;
+use Drupal\qa\Plugin\QaCheck\Dependencies\Undeclared;
 use Drupal\qa\Plugin\QaCheck\References\Integrity;
 use Drupal\qa\Plugin\QaCheck\References\TaxonomyIndex;
+use Drupal\qa\Plugin\QaCheck\System\ExternalCode;
 use Drupal\qa\Plugin\QaCheck\System\UnusedExtensions;
 use Drupal\qa\Plugin\QaCheckManager;
 use Drupal\qa\Workflows\ContentModerationGraph;
@@ -121,6 +123,29 @@ class QaCommands extends DrushCommands {
       ];
     }
     $this->output->writeln(Yaml::dump($res, 5, 2));
+  }
+
+
+  /**
+   * Show undeclared function-based dependencies.
+   *
+   * @command qa:dependencies:undeclared
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function dependenciesUndeclared() {
+    $this->runPlugin(Undeclared::NAME);
+  }
+
+  /**
+   * Show code which is either external or without an identifiable source.
+   *
+   * @command qa:system:external
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function externalCode() {
+    $this->runPlugin(ExternalCode::NAME);
   }
 
   /**

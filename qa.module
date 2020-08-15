@@ -4,11 +4,13 @@
  * @file
  * OSInet Quality Assurance module for Drupal.
  *
- * @copyright Copyright (C) 2005-2018 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
+ * @copyright Copyright (C) 2005-2018 Frederic G. MARAND for Ouest Systèmes
+ *   Informatiques (OSInet)
  *
  * @since DRUPAL-4-6
  *
- * @license Licensed under the disjunction of the CeCILL, version 2 and General Public License version 2 and later
+ * @license Licensed under the disjunction of the CeCILL, version 2 and General
+ *   Public License version 2 and later
  *
  * License note: QA is distributed by OSInet to its customers under the
  * CeCILL 2.0 license. OSInet support services only apply to the module
@@ -21,7 +23,11 @@
  * are abided by, the module distributor in that case being the
  * drupal.org organization or the downstream distributor, not OSInet.
  */
+
+use Drupal\Component\Utility\Xss;
+use Drupal\Core\Url;
 use Drupal\qa\Variable\Variable;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Page callback for qa/dependencies
@@ -33,7 +39,7 @@ use Drupal\qa\Variable\Variable;
  */
 function qa_page_dependencies() {
   /** @var \Drupal\qa\Dependencies $qaDep */
-  $qaDep = \Drupal::service('qa.dependencies');
+  $qaDep = Drupal::service('qa.dependencies');
   $G = $qaDep->build();
   // passed by reference: cannot pass a function return
   return graphviz_filter_render($G);
@@ -49,14 +55,16 @@ function qa_page_dependencies() {
 function qa_report_finished($success, $results, $operations) {
   unset($results['#message']);
   if ($success) {
-    $message = format_plural(count($results), 'One control pass ran.', '@count control passes ran.');
+    $message = Drupal::translation()
+      ->formatPlural(count($results), 'One control pass ran.',
+        '@count control passes ran.');
   }
   else {
     $message = t('Finished with an error.');
   }
   drupal_set_message($message);
   $_SESSION['qa_results'] = $results;
-  drupal_goto('admin/reports/qa/results');
+  return new RedirectResponse(Url::fromRoute('qa.reports.results'));
 }
 
 /**
@@ -66,37 +74,41 @@ function qa_report_finished($success, $results, $operations) {
  */
 function qa_report_results() {
   if (empty($_SESSION['qa_results'])) {
-    drupal_goto('admin/reports/qa');
+    return new RedirectResponse(Url::fromRoute('qa.reports'));
   }
   // Work around incomplete classes
   $results = unserialize(serialize($_SESSION['qa_results']));
 
-  $header = array(
+  $header = [
     t('Control'),
     t('Status'),
     t('Results'),
-  );
-  $data = array();
+  ];
+  $data = [];
+  $r = Drupal::service('renderer');
   foreach ($results as $pass) {
     $control = $pass->control;
-    $data[] = array(
+    $data[] = [
       $control->title,
       $pass->status
-        ? theme('image', array(
-          'path' => 'misc/watchdog-ok.png',
-          'alt' => t('OK'),
-          ))
-        : theme('image', array(
-          'path' => 'misc/watchdog-error.png',
-          'alt' => t('Error'),
-          )),
+        ? $r->render([
+        '#theme' => 'image',
+        '#path' => 'misc/watchdog-ok.png',
+        '#alt' => t('OK'),
+      ])
+        : $r->render([
+        '#theme' => 'image',
+        '#path' => 'misc/watchdog-error.png',
+        '#alt' => t('Error'),
+      ]),
       $pass->result,
-    );
+    ];
   }
-  $ret = theme('table', [
-    'header' => $header,
-    'rows' => $data,
-    'attributes' => [
+  $ret = $r->render([
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $data,
+    '#attributes' => [
       'id' => 'qa-results',
     ],
     '#attached' => ['library' => ['qa/results']],
@@ -111,19 +123,20 @@ function qa_report_results() {
  * @return array
  */
 function qa_report_form($form, $form_state) {
-  $form = array();
+  $form = [];
   $base = drupal_get_path('module', 'qa');
   $packages = Exportable::getClasses($base, 'Drupal\qa\BasePackage');
   ksort($packages);
   foreach ($packages as $package_name => $package) {
     $collapsed = TRUE;
-    $form[$package_name] = array(
+    $form[$package_name] = [
       '#type' => 'fieldset',
-      '#title' => filter_xss_admin($package->title),
-      '#description' => filter_xss_admin($package->description),
+      '#title' => Xss::filterAdmin($package->title),
+      '#description' => Xss::filterAdmin($package->description),
       '#collapsible' => TRUE,
-    );
-    $controls = $package->getClasses($package->dir, 'Drupal\qa\Plugin\Qa\Control\BaseControl');
+    ];
+    $controls = $package->getClasses($package->dir,
+      'Drupal\qa\Plugin\Qa\Control\BaseControl');
 
     foreach ($controls as $control_name => $control) {
       $default_value = isset($_SESSION[$control_name])
@@ -133,37 +146,39 @@ function qa_report_form($form, $form_state) {
         $collapsed = FALSE;
       }
 
-      $deps = array();
+      $deps = [];
       $met = TRUE;
       foreach ($control->getDependencies() as $dep_name) {
-        if (module_exists($dep_name)) {
-          $deps[] = t('@module (<span class="admin-enabled">available</span>)', array('@module' => $dep_name));
+        if (Drupal::moduleHandler()->moduleExists($dep_name)) {
+          $deps[] = t('@module (<span class="admin-enabled">available</span>)',
+            ['@module' => $dep_name]);
         }
         else {
-          $deps[] = t('@module (<span class="admin-disabled">unavailable</span>)', array('@module' => $dep_name));
+          $deps[] = t('@module (<span class="admin-disabled">unavailable</span>)',
+            ['@module' => $dep_name]);
           $met = FALSE;
         }
       }
-      $form[$package_name][$control_name] = array(
-        '#type'          => 'checkbox',
+      $form[$package_name][$control_name] = [
+        '#type' => 'checkbox',
         '#default_value' => $met ? $default_value : 0,
-        '#title'         => filter_xss_admin($control->title),
-        '#description'   => filter_xss_admin($control->description),
-        '#disabled'      => !$met,
-      );
-      $form[$package_name][$control_name .'-dependencies'] = array(
-        '#value' => t('Depends on: !dependencies', array(
+        '#title' => Xss::filterAdmin($control->title),
+        '#description' => Xss::filterAdmin($control->description),
+        '#disabled' => !$met,
+      ];
+      $form[$package_name][$control_name . '-dependencies'] = [
+        '#value' => t('Depends on: !dependencies', [
           '!dependencies' => implode(', ', $deps),
-          )),
+        ]),
         '#prefix' => '<div class="admin-dependencies">',
         '#suffix' => '</div>',
-      );
+      ];
     }
     $form[$package_name]['#collapsed'] = $collapsed;
   }
 
   $form['submit'] = [
-    '#type'  => 'submit',
+    '#type' => 'submit',
     '#value' => t('Run controls'),
   ];
 
@@ -177,37 +192,40 @@ function qa_report_form($form, $form_state) {
  * @param array $form_state
  */
 function qa_report_form_submit($form, &$form_state) {
-  $controls = array();
+  $controls = [];
   foreach ($form_state['values'] as $item => $value) {
-    if (class_exists($item) && is_subclass_of($item, '\Drupal\qa\Plugin\Qa\Control\BaseControl')) {
+    if (class_exists($item) && is_subclass_of($item,
+        '\Drupal\qa\Plugin\Qa\Control\BaseControl')) {
       if ($value) {
         $controls[$item] = $value;
       }
       $_SESSION[$item] = $value;
     }
     elseif ($value == 1) {
-      $args = array(
+      $args = [
         '%control' => $item,
-      );
-      drupal_set_message(t('Requested invalid control %control', $args), 'error');
-      watchdog('qa', 'Requested invalid control %control', $args, WATCHDOG_ERROR);
+      ];
+      drupal_set_message(t('Requested invalid control %control', $args),
+        'error');
+      \Drupal::logger('qa')->error('Requested invalid control %control', $args);
     }
   }
 
-  drupal_set_message(t('Prepare to run these controls: @controls', array(
-    '@controls' => implode(', ', array_keys($controls)))), 'status');
-  $batch = array(
-    'operations'       => array(),
-    'title'            => t('QA Controls running'),
-    'init_message'     => t('QA Controls initializing'),
+  drupal_set_message(t('Prepare to run these controls: @controls', [
+    '@controls' => implode(', ', array_keys($controls)),
+  ]), 'status');
+  $batch = [
+    'operations' => [],
+    'title' => t('QA Controls running'),
+    'init_message' => t('QA Controls initializing'),
     // 'progress_message' => t('current: @current, Remaining: @remaining, Total: @total'),
-    'error_message'    => t('Error in QA Control'),
-    'finished'         => 'qa_report_finished',
+    'error_message' => t('Error in QA Control'),
+    'finished' => 'qa_report_finished',
     // 'file'             => '', // only if outside module file
-  );
+  ];
 
   foreach ($controls as $item => $value) {
-    $batch['operations'][] = array('qa_report_run_pass', array($item));
+    $batch['operations'][] = ['qa_report_run_pass', [$item]];
   }
   batch_set($batch);
 }
@@ -218,23 +236,29 @@ function qa_report_form_submit($form, &$form_state) {
  * @return void
  */
 function qa_report_run_pass($class_name, &$context) {
-  $name_arg = array('@class' => $class_name);
+  $name_arg = ['@class' => $class_name];
 
   $control = new $class_name();
   if (!is_object($control)) {
-    drupal_set_message(t('Cannot obtain an instance for @class', $name_arg), 'error');
-    $context['results']['#message'] = t('Control @class failed to run.', $name_arg);
+    drupal_set_message(t('Cannot obtain an instance for @class', $name_arg),
+      'error');
+    $context['results']['#message'] = t('Control @class failed to run.',
+      $name_arg);
     $context['message'] = t('Control @class failed to run.', $name_arg);
     $context['results'][$class_name] = 'wow';
   }
   else {
-    drupal_set_message(t('Running a control instance for @class', $name_arg), 'status');
+    drupal_set_message(t('Running a control instance for @class', $name_arg),
+      'status');
     $pass = $control->run();
     if (!$pass->status) {
       $context['success'] = FALSE;
     }
     $context['results']['#message'][] = t('Control @class ran', $name_arg);
-    $context['message'] = theme('item_list', $context['results']['#message']);
+    $context['message'] = \Drupal::service('renderer')->render([
+      '#theme' => 'item_list',
+      '#items' => $context['results']['#message'],
+    ]);
     $context['results'][$class_name] = $pass;
   }
 }
