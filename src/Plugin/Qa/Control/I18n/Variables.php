@@ -2,12 +2,27 @@
 
 namespace Drupal\qa\I18n;
 
-use Drupal\qa\BaseControl;
+use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
  * Find inconsistencies in {i18nvariables} and {languages}
  */
 class Variables extends BaseControl {
+
+  /**
+   * @var string
+   */
+  protected $package_name;
+
+  /**
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup
+   */
+  protected $description;
+
+  /**
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup
+   */
+  protected $title;
 
   /**
    * {@inheritdoc]

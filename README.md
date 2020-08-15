@@ -39,7 +39,7 @@ typically by piping the output like this:
 
 ## Availability per core version
 <table border="1">
-  <caption>Porting status on 2020-08-14</caption>
+  <caption>Porting status on 2020-08-15</caption>
   <tr>
     <th>Package</th>
     <th>Check</th>
@@ -50,7 +50,7 @@ typically by piping the output like this:
   <tr>
     <td>Cache</td>
     <td>Size</td>
-    <td>Planned</td>
+    <td>OK</td>
     <td>OK</td>
     <td></td>
     </tr>

@@ -5,8 +5,10 @@ namespace Drupal\qa\Plugin\Qa\Control;
 use Drupal\Component\Utility\Crypt;
 use Drupal\qa\Exportable;
 use Drupal\qa\Pass;
+use Drupal\qa\Plugin\QaCheckInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class BaseControl extends Exportable {
+abstract class BaseControl extends Exportable implements QaCheckInterface {
 
   /**
    * The package to which the control belongs
@@ -48,6 +50,10 @@ abstract class BaseControl extends Exportable {
     $this->package_name = $this->namespace;
   }
 
+  public static function create(ContainerInterface $container) {
+    return new static();
+  }
+
   /**
    * Return an array of module dependencies.
    *
@@ -58,7 +64,7 @@ abstract class BaseControl extends Exportable {
   }
 
   /**
-   * @return \Drupal\qa\BaseControl
+   * @return \Drupal\qa\Plugin\Qa\Control\BaseControl
    */
   public static function getInstance() {
     $name = get_called_class();

@@ -2,7 +2,7 @@
 
 namespace Drupal\qa\Taxonomy;
 
-use Drupal\qa\BaseControl;
+use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
  * Find views containing PHP code
