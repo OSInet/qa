@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\qa\Commands;
 
 use Drupal\qa\Controller\WorkflowsReportController;
+use Drupal\qa\Plugin\QaCheck\Cache\Sizes;
 use Drupal\qa\Plugin\QaCheck\Dependencies\Undeclared;
 use Drupal\qa\Plugin\QaCheck\References\Integrity;
 use Drupal\qa\Plugin\QaCheck\References\TaxonomyIndex;
@@ -122,9 +123,19 @@ class QaCommands extends DrushCommands {
         'data' => $result->data,
       ];
     }
-    $this->output->writeln(Yaml::dump($res, 5, 2));
+    $this->output->writeln(Yaml::dump($res, 6, 2));
   }
 
+  /**
+   * Show oversize cache data.
+   *
+   * @command qa:cache:sizes
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function cacheSizes() {
+    $this->runPlugin(Sizes::NAME);
+  }
 
   /**
    * Show undeclared function-based dependencies.

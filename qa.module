@@ -4,8 +4,7 @@
  * @file
  * OSInet Quality Assurance module for Drupal.
  *
- * @copyright Copyright (C) 2005-2018 Frederic G. MARAND for Ouest Systèmes
- *   Informatiques (OSInet)
+ * @copyright Copyright (C) 2005-2020 Frederic G. MARAND for Ouest Systèmes Informatiques (OSInet)
  *
  * @since DRUPAL-4-6
  *
@@ -26,6 +25,8 @@
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Url;
+use Drupal\qa\BaseControl;
+use Drupal\qa\Exportable;
 use Drupal\qa\Variable\Variable;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -135,8 +136,7 @@ function qa_report_form($form, $form_state) {
       '#description' => Xss::filterAdmin($package->description),
       '#collapsible' => TRUE,
     ];
-    $controls = $package->getClasses($package->dir,
-      'Drupal\qa\Plugin\Qa\Control\BaseControl');
+    $controls = $package->getClasses($package->dir, BaseControl::class);
 
     foreach ($controls as $control_name => $control) {
       $default_value = isset($_SESSION[$control_name])

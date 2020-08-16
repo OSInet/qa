@@ -2,12 +2,28 @@
 
 namespace Drupal\qa\I18n;
 
-use Drupal\qa\BaseControl;
+use Drupal\qa\Pass;
+use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
  * Find inconsistencies in {i18nvariables} and {languages}
  */
 class Variables extends BaseControl {
+
+  /**
+   * @var string
+   */
+  protected $package_name;
+
+  /**
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup
+   */
+  protected $description;
+
+  /**
+   * @var \Drupal\Core\StringTranslation\TranslatableMarkup
+   */
+  protected $title;
 
   /**
    * {@inheritdoc]
@@ -21,7 +37,7 @@ class Variables extends BaseControl {
   /**
    * Identify variables translations for languages not currently on site
    */
-  function checkExtra() {
+  public function checkExtra() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
     $sq = <<<sql
@@ -53,7 +69,7 @@ sql;
   /**
    * Identify variables for which at least one translation is missing
    */
-  function checkMissing() {
+  public function checkMissing() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
     $sq = <<<sql
@@ -86,13 +102,12 @@ sql;
     return $ret;
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, ['i18n']); // introduces {i18n_variable}
+  public static function getDependencies(): array {
+    $ret = ['i18n']; // introduces {i18n_variable}
     return $ret;
   }
 
-  function run() {
+  public function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkExtra());
     $pass->life->modify();

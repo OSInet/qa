@@ -4,19 +4,49 @@ Quality Assurance module
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/OSInet/qa/badges/quality-score.png?b=8.x-1.x)](https://scrutinizer-ci.com/g/OSInet/qa/?branch=8.x-1.x)
 
 This module needs to be installed on your site to run checks on various aspects
-of your production database, configuration storage (D9/D8) and file layout.
+of your Drupal production database, configuration storage (D9/D8) and file layout.
 
-## Controls (checks)
+It also has branches for D7 and D6, each running on the matching version.
 
-It is designed to be extended by additional modules implementing control plugins.
+_CAVEAT EMPTOR_ - using this module and interpreting its results requires significant
+understanding of core operation: just because a check reports on suspicious data
+does not _imply_ there is actually an problem, only that human review is needed.
+This tools is primarily designed to help professional auditors review sites; it
+is not meant for webmasters in the general case.
 
-In D9/D8, these are standard core plugins. In D7/D6, these were derived from
-`Drupal\qa\ControlBase`, supported by a custom plugin system.
+
+## Built-in checks
+
+QA is designed to be extended by additional modules implementing control plugins.
+
+| Check                    | Status  | Description |
+|--------------------------|---------|-------------|
+| Cache.Sizes              | OK      | Report on cache bins with suspicious sizes: empty, too big, too many items, items too large |
+| Config.Overrides         | Plan    | Find config not matching its default value. |
+| Config.Schema            | Plan    | Find config not matching its schema and schemaless config |
+| References.Integrity     | OK      | Find broken references in `file`, `image`, `entity_reference`, `entity_reference_revisions`, and `dynamic_entity_reference` fields |
+| References.TaxonomyIndex | OK      | Find broken links in the `taxonomy` relating nodes and taxonomy terms |
+| System.External          | OK      | Find code loaded from directories outside the project |
+| System.ForceRemoved      | TBP     | Find incorrectly removed extensions    |
+| System.UndeclaredDependencies | OK | Find module dependencies not declared in `<module>.info.yml` files. |
+| System.Unused            | OK      | Find entirely unused projects          |
+| Taxonomy.Freetagging     | TBP     | Find unused free-tagging terms.        |
+| Workflows.Summary        | OK      | Summarize content moderation workflows |
+| Workflows.Transitions    | WIP     | Find inconsistent transitions          |
+
+- Plan: check is expected to be developed, but not yet started
+- TBP: to be ported = check existing in earlier versions but not yet ported to D9/D8.
+- WIP: work in progress.
+
+QA also includes some non-check commands.
+
+| Graph               | Status | Description                         |
+|---------------------|--------|-------------------------------------|
+| `qa:dependencies`   | OK  | Graph of module and theme dependencies |
+| `qa:workflows-list` | WIP | Graph of workflow                      |
 
 
-## Graphs
-
-It also provides a few graphs:
+### Graphs
 
 * dependency graph of enabled modules and themes, usable either
 on the Web UI for smaller sites or from drush for bigger graphs. This feature
@@ -37,118 +67,41 @@ typically by piping the output like this:
 ```
 * The workflow graph also has a tabular version.
 
-## Availability per core version
-<table border="1">
-  <caption>Porting status on 2020-08-14</caption>
-  <tr>
-    <th>Package</th>
-    <th>Check</th>
-    <th>Drupal 9/8</th>
-    <th>Drupal 7</th>
-    <th>Drupal 6</th>
-    </tr>
-  <tr>
-    <td>Cache</td>
-    <td>Size</td>
-    <td>Planned</td>
-    <td>OK</td>
-    <td></td>
-    </tr>
-  <tr>
-    <td rowspan="3">References</td>
-    <td>Integrity</td>
-    <td>OK:<ul>
-    <li>file</li>
-    <li>image</li>
-    <li>ER</li>
-    <li>ERR</li>
-    <li>DER</li>
-    </ul></td>
-    <td></td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>External code</td>
-    <td>OK</td>
-    <td></td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>Taxonomy Index</td>
-    <td>OK</td>
-    <td></td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td rowspan="4">System</td>
-    <td>Dependency (graph)</td>
-    <td>OK</td>
-    <td>OK</td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td>Undeclared dependencies</td>
-    <td>OK</td>
-    <td></td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>Unused</td>
-    <td>OK</td>
-    <td>OK</td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>Force removed</td>
-    <td>?</td>
-    <td>OK</td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>Taxonomy</td>
-    <td>Freetagging</td>
-    <td>Planned</td>
-    <td></td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td rowspan="2">Variables</td>
-    <td>Size</td>
-    <td>n.a.</td>
-    <td>OK</td>
-    <td></td>
-    </tr>
-  <tr>
-    <td>I18N</td>
-    <td>n.a.</td>
-    <td></td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td rowspan="2">Views</td>
-    <td>Override</td>
-    <td>n.a.</td>
-    <td>OK</td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td>Php</td>
-    <td>Planned</td>
-    <td>OK</td>
-    <td>OK</td>
-    </tr>
-  <tr>
-    <td rowspan="4">Workflows (Content Moderation)</td>
-    <td>Summary</td>
-    <td>OK</td>
-    <td colspan="2" rowspan="3">n.a.</td>
-    </tr>
-  <tr>
-    <td>Transition (graph)</td>
-    <td>WIP</td>
-    </tr>
-  <tr>
-    <td>Transition (table)</td>
-    <td>WIP</td>
-    </tr>
-  </table>
+
+## Copyright and license
+
+This module is &copy; 2005-2020 [Frédéric G. MARAND](https://blog.riff.org/), for [OSInet](https://osinet.fr).
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+
+## Contributing
+
+Developing additional custom checks follows this process:
+
+- create a custom module
+- create a `QaCheck` plugin, which will implement `QaCheckInterface`, and likely
+  be based on `QaCheckBase` for simplicity. Its properties are:
+  - `id` : just like any Drupal plugin. The name should be like `<package>.<check_name>`,
+    where `<package>`  will be used to group related packages in the UI. Plugins
+    are expected to be located in the `Plugin\QaCheck\<Package>` directory, instead of
+    being just in the `Plugin\QaCheck` directory.
+  - `label`: the short description of the plugin, used in admin lists.
+  - `details`: optional. A longer description of the plugin purpose, used for help in the Web UI. Default: empty.
+  - `usesBatch`: optional. Enables use of the Batch API for long-running checks (WIP). Default: `false`.
+  - `steps`: optional. The number of different steps reported by the check. Default: 1.
+- add a command to `QaCommands`, calling `QaCommands::runPlugin($name)`.
+
+Contributions are welcome: use Github issues and pull requests.
+

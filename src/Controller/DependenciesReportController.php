@@ -12,29 +12,13 @@ class DependenciesReportController extends ControllerBase {
   /**
    * Action.
    *
-   * @return string
-   *   Return Hello string.
+   * @return array
+   *   A render array.
    */
   public function report() {
     return [
       '#type' => 'markup',
       '#markup' => $this->t('Implement method: report'),
-    ];
-  }
-
-  /**
-   * Placeholder controller for "dependencies".
-   *
-   * @param string $qaVariable
-   *   The variable name.
-   *
-   * @return array
-   *   A render array.
-   */
-  public function view($qaVariable) {
-    return [
-      '#type' => 'markup',
-      '#markup' => $this->t('Implement method: view'),
     ];
   }
 
