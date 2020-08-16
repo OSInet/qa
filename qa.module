@@ -8,52 +8,54 @@
  *
  * @since DRUPAL-4-6
  *
- * @license Licensed under the disjunction of the CeCILL, version 2 and General
- *   Public License version 2 and later
+ * @license GPL-2.0-or-later
  *
- * License note: QA is distributed by OSInet to its customers under the
- * CeCILL 2.0 license. OSInet support services only apply to the module
- * when distributed by OSInet, not by any third-party further down the
- * distribution chain.
+ * License note: OSInet support services only apply to the module when
+ * distributed by OSInet, not by any third-party further down the distribution
+ * chain enabled by GPL.
  *
- * If you obtained QA from drupal.org, that site received it under the
- * GPLv2 license and can therefore distribute it under the GPLv2, and
- * so can you and just anyone down the chain as long as the GPLv2 terms
- * are abided by, the module distributor in that case being the
- * drupal.org organization or the downstream distributor, not OSInet.
+ * If you obtained QA from another source, that source received it under the
+ * GPL, and can therefore distribute it under the GPL, and so can you and just
+ * anyone down the chain as long as the GPL terms are abided by, the module
+ * distributor in that case being that source, not OSInet.
  */
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\qa\BaseControl;
 use Drupal\qa\Exportable;
-use Drupal\qa\Variable\Variable;
+use Drupal\qa\Variable;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Page callback for qa/dependencies
+ * Page callback for qa/dependencies.
  *
- * TODO convert to native Image_GraphViz to remove dependency on graphviz_filter
- * XXX convert to Grafizzi to remove dependency on Image_GraphViz
+ * TODO convert to native Image_GraphViz to stop depending on graphviz_filter.
+ * XXX convert to Grafizzi to remove dependency on Image_GraphViz.
  *
  * @return string
+ *   A DOT digraph file.
  */
 function qa_page_dependencies() {
   /** @var \Drupal\qa\Dependencies $qaDep */
   $qaDep = Drupal::service('qa.dependencies');
-  $G = $qaDep->build();
-  // passed by reference: cannot pass a function return
-  return graphviz_filter_render($G);
+  $graph = $qaDep->build();
+  // Passed by reference: cannot pass a function return.
+  return graphviz_filter_render($graph);
 }
 
 /**
  * Batch conclusion callback.
  *
- * @param boolean $success
+ * @param bool $success
+ *   Did the batch succeed ?
  * @param array $results
+ *   The batch steps results.
  * @param array $operations
+ *   The operations performed during the batch.
  */
-function qa_report_finished($success, $results, $operations) {
+function qa_report_finished(bool $success, array $results, array $operations) {
   unset($results['#message']);
   if ($success) {
     $message = Drupal::translation()
@@ -77,7 +79,7 @@ function qa_report_results() {
   if (empty($_SESSION['qa_results'])) {
     return new RedirectResponse(Url::fromRoute('qa.reports'));
   }
-  // Work around incomplete classes
+  // Work around incomplete classes.
   $results = unserialize(serialize($_SESSION['qa_results']));
 
   $header = [
@@ -92,12 +94,12 @@ function qa_report_results() {
     $data[] = [
       $control->title,
       $pass->status
-        ? $r->render([
+      ? $r->render([
         '#theme' => 'image',
         '#path' => 'misc/watchdog-ok.png',
         '#alt' => t('OK'),
       ])
-        : $r->render([
+      : $r->render([
         '#theme' => 'image',
         '#path' => 'misc/watchdog-error.png',
         '#alt' => t('Error'),
@@ -114,7 +116,7 @@ function qa_report_results() {
     ],
     '#attached' => ['library' => ['qa/results']],
   ]);
-  // unset($_SESSION['qa_results']);
+  // unset($_SESSION['qa_results']).
   return $ret;
 }
 
@@ -122,6 +124,7 @@ function qa_report_results() {
  * Form builder for QA packages/controls selection form.
  *
  * @return array
+ *   A form array.
  */
 function qa_report_form($form, $form_state) {
   $form = [];
@@ -186,12 +189,14 @@ function qa_report_form($form, $form_state) {
 }
 
 /**
- * Submit handler for QA packages/controls selection form
+ * Submit handler for QA packages/controls selection form.
  *
  * @param array $form
- * @param array $form_state
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
  */
-function qa_report_form_submit($form, &$form_state) {
+function qa_report_form_submit(array $form, FormStateInterface $form_state) {
   $controls = [];
   foreach ($form_state['values'] as $item => $value) {
     if (class_exists($item) && is_subclass_of($item,
@@ -218,10 +223,10 @@ function qa_report_form_submit($form, &$form_state) {
     'operations' => [],
     'title' => t('QA Controls running'),
     'init_message' => t('QA Controls initializing'),
-    // 'progress_message' => t('current: @current, Remaining: @remaining, Total: @total'),
+    'progress_message' => t('current: @current, Remaining: @remaining, Total: @total'),
     'error_message' => t('Error in QA Control'),
     'finished' => 'qa_report_finished',
-    // 'file'             => '', // only if outside module file
+    // 'file'             => '', // only if outside module file.
   ];
 
   foreach ($controls as $item => $value) {
@@ -232,10 +237,8 @@ function qa_report_form_submit($form, &$form_state) {
 
 /**
  * Batch progress step.
- *
- * @return void
  */
-function qa_report_run_pass($class_name, &$context) {
+function qa_report_run_pass($class_name, &$context): void {
   $name_arg = ['@class' => $class_name];
 
   $control = new $class_name();
@@ -263,6 +266,15 @@ function qa_report_run_pass($class_name, &$context) {
   }
 }
 
+/**
+ * Load variable by name.
+ *
+ * @param string $name
+ *   The name of the variable.
+ *
+ * @return \Drupal\qa\Variable|false
+ *   The variable if it was found.
+ */
 function qa_variable_load($name) {
   $variable = new Variable($name);
   if (!$variable->is_set) {

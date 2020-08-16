@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\qa\Plugin\QaCheck\Dependencies;
 
@@ -149,11 +149,11 @@ class Undeclared extends QaCheckBase implements QaCheckInterface {
     $traverser = new NodeTraverser();
     $traverser->addVisitor($visitor = new FunctionCallVisitor());
     $traverser->traverse($stmts);
-    $pad = array_unique($visitor->pad);
     // Ignore builtin/extension functions.
-    $pad = array_filter($pad, function ($name) {
-      return empty($this->qam->internalFunctions[$name]);
-    });
+    $pad = array_filter($visitor->pad, function ($name) {
+      $isInternal = isset($this->qam->internalFunctions[$name]);
+      return !$isInternal;
+    }, ARRAY_FILTER_USE_KEY);
     return $pad;
   }
 
@@ -170,19 +170,22 @@ class Undeclared extends QaCheckBase implements QaCheckInterface {
    */
   protected function moduleActualDependencies(string $name, array $calls): array {
     $modules = [];
-    foreach ($calls as $called) {
+    foreach ($calls as $called => $lines) {
       try {
         $rf = new \ReflectionFunction($called);
       }
       catch (\ReflectionException $e) {
-        $modules[] = "(${called})";
+        $modules["(${called})"][$called] = $lines;
         continue;
       }
 
       // Drupal name-based magic.
       $module = basename($rf->getFileName(), '.module');
       if ($module !== $name) {
-        $modules[] = $module;
+        if (!isset($modules[$module][$called])) {
+          $modules[$module][$called] = [];
+        }
+        $modules[$module][$called] += $lines;
       }
     }
     return $modules;
@@ -198,14 +201,10 @@ class Undeclared extends QaCheckBase implements QaCheckInterface {
    *   A map of modules names by module name.
    */
   protected function moduleDeclaredDependencies(string $name): array {
-    $info = $this->elm->getExtensionInfo($name);
-    $deps = $info['dependencies'] ?? [];
-    $res = [];
-    foreach ($deps as $dep) {
-      $ar = explode(":", $dep);
-      $res[] = array_pop($ar);
-    }
-    return $res;
+    $ext = $this->elm->get($name);
+    // XXX Undocumented API field.
+    $deps = array_keys($ext->requires);
+    return $deps;
   }
 
   /**
@@ -226,7 +225,7 @@ class Undeclared extends QaCheckBase implements QaCheckInterface {
       $calls = $this->functionCalls($path);
       $actual = $this->moduleActualDependencies($module, $calls);
       $declared = $this->moduleDeclaredDependencies($module);
-      $missing = array_diff($actual, $declared);
+      $missing = array_diff_key($actual, array_flip($declared));
       if (!empty($missing)) {
         $undeclared[$module] = $missing;
       }

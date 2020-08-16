@@ -4,6 +4,8 @@ namespace Drupal\qa\Plugin;
 
 use Drupal\Component\Discovery\DiscoveryException;
 use Drupal\Core\DrupalKernelInterface;
+use Drupal\Core\Extension\Extension;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -40,6 +42,13 @@ class QaCheckManager extends DefaultPluginManager {
   protected $vendor;
 
   /**
+   * The extension.list.module service.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $elm;
+
+  /**
    * Constructs a new QaCheckManager object.
    *
    * @param \Traversable $namespaces
@@ -51,15 +60,19 @@ class QaCheckManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    * @param \Drupal\Core\DrupalKernelInterface $kernel
    *   The kernel service.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $elm
+   *   The extension.list.module service.
    */
   public function __construct(
     Traversable $namespaces,
     CacheBackendInterface $cache_backend,
     ModuleHandlerInterface $module_handler,
-    DrupalKernelInterface $kernel
+    DrupalKernelInterface $kernel,
+    ModuleExtensionList $elm
   ) {
     parent::__construct('Plugin/QaCheck', $namespaces, $module_handler,
       QaCheckInterface::class, QaCheck::class);
+    $this->elm = $elm;
     $this->root = realpath($kernel->getAppRoot());
     $this->vendor = self::getVendorDir();
 
@@ -175,6 +188,16 @@ class QaCheckManager extends DefaultPluginManager {
       $this->root . "/core/includes",
       $this->vendor,
     ];
+
+    $list = $this->elm->getList();
+    $required = [];
+    array_walk($list, function (Extension $ext) use (&$required) {
+      // XXX Undocumented API field.
+      if (!empty($ext->info['required'])) {
+        $required[] = $this->root . '/' . $ext->getPath();
+      }
+    });
+    $internal = array_merge($internal, $required);
 
     foreach ($internal as $root) {
       if (strpos($file, $root) !== FALSE) {
