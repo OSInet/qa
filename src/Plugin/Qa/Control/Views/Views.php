@@ -9,7 +9,7 @@ use Drupal\qa\Plugin\Qa\Control\BaseControl;
  */
 abstract class Views extends BaseControl {
 
-  static function getDependencies(): array {
+  static public function getDependencies(): array {
     return ['views'];
   }
 }

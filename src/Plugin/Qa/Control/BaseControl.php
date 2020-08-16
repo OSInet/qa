@@ -3,6 +3,7 @@
 namespace Drupal\qa\Plugin\Qa\Control;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\PrivateKey;
 use Drupal\qa\Exportable;
 use Drupal\qa\Pass;
 use Drupal\qa\Plugin\QaCheckInterface;
@@ -50,18 +51,31 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
   protected static $packages = [];
 
   /**
-   * BaseControl constructor.
+   * The private_key service.
+   *
+   * @var \Drupal\Core\PrivateKey
    */
-  public function __construct() {
+  protected $pk;
+
+  /**
+   * BaseControl constructor.
+   *
+   * @param \Drupal\Core\PrivateKey $pk
+   *   The private_ket service.
+   */
+  public function __construct(PrivateKey $pk) {
     parent::__construct();
     $this->package_name = $this->namespace;
+    $this->pk = $pk;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static();
+    $pk = $container->get('private_key');
+    assert($pk instanceof PrivateKey);
+    return new static($pk);
   }
 
   /**
@@ -141,7 +155,7 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
    */
   public function run(): Pass {
     global $base_url;
-    $site_key = Crypt::hmacBase64($base_url, \Drupal::service('private_key')->get());
+    $site_key = Crypt::hmacBase64($base_url, $this->pk->get());
     $key = uniqid($site_key);
     $pass = new Pass($this);
     $this->passes[$key] = $pass;

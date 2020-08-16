@@ -42,7 +42,9 @@ class ProjectsReportController extends ControllerBase {
 
   public static function create(ContainerInterface $container) {
     $updateManager = $container->get('update.manager');
+    assert($updateManager instanceof UpdateManagerInterface);
     $kve = $container->get('keyvalue.expirable');
+    assert($kve instanceof KeyValueExpirableFactoryInterface);
     return new static($updateManager, $kve);
   }
 
@@ -111,15 +113,15 @@ class ProjectsReportController extends ControllerBase {
     $bc[] = l($this->t('Variables'), 'admin/reports/qa/variable');
     drupal_set_breadcrumb($bc);
 
-    drupal_set_title($this->t('Variable: %name', ['%name' => $variable->name]),
-      PASS_THROUGH);
+    drupal_set_title($this->t('Variable: %name', ['%name' => $variable->name]), ['passthrough' => TRUE]);
     return $variable->dump();
   }
 
   /**
    * Page callback for projects list.
    *
-   * @return string
+   * @return array
+   *   A render array.
    *
    * @FIXME This still uses the D7 info structure.
    *
@@ -187,9 +189,11 @@ class ProjectsReportController extends ControllerBase {
         $rows[] = $row;
       }
     }
-    return theme('table', [
-      'header' => $header,
-      'rows' => $rows,
-    ]);
+    return [
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+    ];
   }
+
 }

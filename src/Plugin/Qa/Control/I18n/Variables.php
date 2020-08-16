@@ -37,7 +37,7 @@ class Variables extends BaseControl {
   /**
    * Identify variables translations for languages not currently on site
    */
-  function checkExtra() {
+  public function checkExtra() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
     $sq = <<<sql
@@ -69,7 +69,7 @@ sql;
   /**
    * Identify variables for which at least one translation is missing
    */
-  function checkMissing() {
+  public function checkMissing() {
     $languages = array_keys(language_list());
     $ph = db_placeholders($languages, 'char');
     $sq = <<<sql
@@ -102,12 +102,12 @@ sql;
     return $ret;
   }
 
-  static function getDependencies(): array {
+  public static function getDependencies(): array {
     $ret = ['i18n']; // introduces {i18n_variable}
     return $ret;
   }
 
-  function run(): Pass {
+  public function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkExtra());
     $pass->life->modify();

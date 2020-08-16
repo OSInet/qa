@@ -15,7 +15,7 @@ class Overrides extends Views {
     $this->description = t('Have any views been overridden or only created in the DB ? This is a performance and change management issue.');
   }
 
-  function checkViewType($view) {
+  public function checkViewType($view) {
     $status = $view->type == t('Default') ? 1 : 0;
     if (!$status) {
       $name = empty($view->human_name) ? $view->name : $view->human_name;
@@ -37,7 +37,7 @@ class Overrides extends Views {
     return $ret;
   }
 
-  function run(): Pass {
+  public function run(): Pass {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
     foreach ($views as $view) {

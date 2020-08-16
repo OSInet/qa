@@ -14,8 +14,8 @@ class VariablesReportController extends ControllerBase {
   /**
    * Action.
    *
-   * @return string
-   *   Return Hello string.
+   * @return array
+   *   A render array.
    */
   public function report() {
     return [

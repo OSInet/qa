@@ -116,7 +116,7 @@ class Php extends Views {
     return $php;
   }
 
-  function run(): Pass {
+  public function run(): Pass {
     $pass = parent::run();
     $views = views_get_all_views(TRUE);
     foreach ($views as $view) {

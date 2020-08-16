@@ -36,6 +36,7 @@ class CheckListController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     $qam = $container->get(Data::MANAGER);
+    assert($qam instanceof QaCheckManager);
     return new static($qam);
   }
 
@@ -79,22 +80,6 @@ class CheckListController extends ControllerBase {
       $checks['#items'][] = $group;
     }
     return $checks;
-  }
-
-  /**
-   * Placeholder controller for "view".
-   *
-   * @param string $qaVariable
-   *   The variable to view.
-   *
-   * @return array
-   *   A render array.
-   */
-  public function view($qaVariable) {
-    return [
-      '#type' => 'markup',
-      '#markup' => $this->t('Implement method: view'),
-    ];
   }
 
 }

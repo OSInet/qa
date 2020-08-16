@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\Taxonomy;
 
+use Drupal\Core\PrivateKey;
 use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
@@ -13,8 +14,8 @@ class Freetagging extends BaseControl {
   /**
    * {@inheritdoc]
    */
-  public function __construct() {
-    parent::__construct();
+  public function __construct(PrivateKey $pk) {
+    parent::__construct($pk);
     $this->package_name = __NAMESPACE__;
   }
 
@@ -40,7 +41,7 @@ class Freetagging extends BaseControl {
    *
    * @return array
    */
-  function checkTags($vocabulary) {
+  public function checkTags($vocabulary) {
     $sq = <<<sql
 SELECT td.tid
 FROM {taxonomy_term_data} td
@@ -69,7 +70,7 @@ sql;
     return $ret;
   }
 
-  function run(): Pass {
+  public function run(): Pass {
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $vocabulary) {
