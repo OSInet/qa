@@ -8,17 +8,21 @@ use Drupal\qa\Pass;
 use Drupal\qa\Plugin\QaCheckInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Base class for legacy Controls.
+ */
 abstract class BaseControl extends Exportable implements QaCheckInterface {
 
   /**
-   * The package to which the control belongs
+   * The package to which the control belongs.
    *
    * @var string
    */
+  // phpcs:ignore
   public $package_name;
 
   /**
-   * An options hash
+   * An options hash.
    *
    * @var array
    */
@@ -39,17 +43,23 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
   protected static $instances = [];
 
   /**
-   * Per-package list of instances
+   * Per-package list of instances.
    *
    * @var array
    */
   protected static $packages = [];
 
+  /**
+   * BaseControl constructor.
+   */
   public function __construct() {
     parent::__construct();
     $this->package_name = $this->namespace;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static();
   }
@@ -58,13 +68,15 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
    * Return an array of module dependencies.
    *
    * @return array
+   *   The names of the dependencies.
    */
-  public static function getDependencies() {
-    return [];
-  }
+  abstract public static function getDependencies(): array;
 
   /**
+   * Get the singleton instance for the requested control.
+   *
    * @return \Drupal\qa\Plugin\Qa\Control\BaseControl
+   *   The instance.
    */
   public static function getInstance() {
     $name = get_called_class();
@@ -85,10 +97,24 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getPluginId() {
+    return self::getInstance()->name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPluginDefinition() {
+    return [];
+  }
+
+  /**
    * Returns per-package controls.
    *
    * @param string $package_name
-   *   If given, only return the list of controls belonging to that package
+   *   If given, only return the list of controls belonging to that package.
    *
    * @return array
    *   - if $package_name is given, an array of control instances
@@ -113,7 +139,7 @@ abstract class BaseControl extends Exportable implements QaCheckInterface {
    *   - 0: failure
    *   - 1: success
    */
-  public function run() {
+  public function run(): Pass {
     global $base_url;
     $site_key = Crypt::hmacBase64($base_url, \Drupal::service('private_key')->get());
     $key = uniqid($site_key);

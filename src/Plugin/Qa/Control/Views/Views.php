@@ -9,9 +9,7 @@ use Drupal\qa\Plugin\Qa\Control\BaseControl;
  */
 abstract class Views extends BaseControl {
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, ['views']);
-    return $ret;
+  static function getDependencies(): array {
+    return ['views'];
   }
 }

@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\Taxonomy;
 
+use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
@@ -17,7 +18,7 @@ class Freetagging extends BaseControl {
     $this->package_name = __NAMESPACE__;
   }
 
-  public static function getDependencies() {
+  public static function getDependencies(): array {
     $ret = BaseControl::getDependencies();
     $ret = array_merge($ret, ['taxonomy']);
     return $ret;
@@ -68,7 +69,7 @@ sql;
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $vocabularies = taxonomy_get_vocabularies();
     foreach ($vocabularies as $vocabulary) {

@@ -2,6 +2,7 @@
 
 namespace Drupal\qa\I18n;
 
+use Drupal\qa\Pass;
 use Drupal\qa\Plugin\Qa\Control\BaseControl;
 
 /**
@@ -101,13 +102,12 @@ sql;
     return $ret;
   }
 
-  static function getDependencies() {
-    $ret = parent::getDependencies();
-    $ret = array_merge($ret, ['i18n']); // introduces {i18n_variable}
+  static function getDependencies(): array {
+    $ret = ['i18n']; // introduces {i18n_variable}
     return $ret;
   }
 
-  function run() {
+  function run(): Pass {
     $pass = parent::run();
     $pass->record($this->checkExtra());
     $pass->life->modify();

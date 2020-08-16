@@ -123,7 +123,7 @@ class QaCommands extends DrushCommands {
         'data' => $result->data,
       ];
     }
-    $this->output->writeln(Yaml::dump($res, 5, 2));
+    $this->output->writeln(Yaml::dump($res, 6, 2));
   }
 
   /**

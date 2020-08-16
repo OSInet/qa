@@ -25,13 +25,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @QaCheck(
  *   id = "cache.sizes",
  *   label = @Translation("Cache sizes"),
- *   details = @Translation("Find cache entries larger than 0.5MB and bins over 1 GB or over 1M items."),
+ *   details = @Translation("Find cache entries ≥0.5MB and bins which are empty, ≥1GB, or ≥128k items."),
  *   usesBatch = false,
  *   steps = 1,
  * )
  */
 class Sizes extends QaCheckBase implements QaCheckInterface {
   use StringTranslationTrait;
+
+  const ELLIPSIS = '…';
 
   const NAME = 'cache.sizes';
 
@@ -53,7 +55,7 @@ class Sizes extends QaCheckBase implements QaCheckInterface {
   /**
    * Size of data summary in reports.
    */
-  const DATA_SUMMARY_LENGTH = 1024;
+  const SUMMARY_LENGTH = 1 << 9;
 
   /**
    * The database service.
@@ -170,8 +172,8 @@ class Sizes extends QaCheckBase implements QaCheckInterface {
     }
 
     $sql = <<<SQL
-SELECT cid, data, expire, created, serialized 
-FROM {$bin} 
+SELECT cid, data, expire, created, serialized
+FROM {$bin}
 ORDER BY cid;
 SQL;
     $q = $this->db->query($sql);
@@ -180,7 +182,11 @@ SQL;
       return $res;
     }
 
-    [$res->ok, $res->data] = $this->checkBinContents($q);
+    [$res->ok, $res->data['count'], $res->data['size'], $res->data['items']] =
+      $this->checkBinContents($q);
+    if ($res->ok) {
+      unset($res->data['items']);
+    }
     return $res;
   }
 
@@ -192,27 +198,36 @@ SQL;
    *
    * @return array
    *   - 0 : status bool
-   *   - 1 : result array
+   *   - 1 : item count
+   *   - 2 : total size
+   *   - 3 : result array
    */
   protected function checkBinContents(StatementInterface $q) {
+    $count = 0;
+    $size = 0;
     $status = TRUE;
-    $result = [];
+    $items = [];
     foreach ($q->fetchAll() as $row) {
       // Cache drivers will need to serialize anyway.
       $data = $row->serialized ? $row->data : serialize($row->data);
       $len = strlen($data);
       if ($len == 0 || $len >= static::MAX_ITEM_SIZE) {
         $status = FALSE;
-        $result[] = [
-          $row->cid,
-          number_format($len, 0, ',', ''),
+        $items[$row->cid] = [
+          'len' => number_format($len, 0, ',', ''),
           // Auto-escaped in Twig when rendered in the Web UI.
-          mb_substr($data, 0, static::DATA_SUMMARY_LENGTH) . '&hellip;',
+          'data' => mb_substr($data, 0, static::SUMMARY_LENGTH) . self::ELLIPSIS,
         ];
       }
+      $size += $len;
+      $count++;
     }
 
-    return [$status, $result];
+    // Empty bins are suspicious. So are bins with empty entries.
+    if ($count === 0 || $size === 0) {
+      $status = FALSE;
+    }
+    return [$status, $count, $size, $items];
   }
 
   /**
