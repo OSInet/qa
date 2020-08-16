@@ -3,6 +3,7 @@ services:
     class: Drupal\qa\Plugin\QaCheckManager
     arguments:
       - '@kernel'
+      - '@extension.list.module'
     parent: default_plugin_manager
 
   logger.channel.qa:

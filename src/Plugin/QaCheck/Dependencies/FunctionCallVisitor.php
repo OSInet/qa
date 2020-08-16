@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\qa\Plugin\QaCheck\Dependencies;
 
@@ -33,9 +33,16 @@ class FunctionCallVisitor extends NodeVisitorAbstract {
    * {@inheritdoc}
    */
   public function enterNode(Node $node) {
-    // Method calls need a different handling, using MethodCall.
-    if ($node instanceof FuncCall) {
-      $this->pad[] = implode('\\', $node->name->parts);
+    // Why this test ?
+    // - Method calls need a different handling, using MethodCall.
+    // - Closure calls are named by the variable holding them, and are
+    //   necessarily defined, so don't need to be tracked.
+    if ($node instanceof FuncCall && isset($node->name->parts)) {
+      $func = implode('\\', $node->name->parts);
+      if (!isset($this->pad[$func])) {
+        $this->pad[$func] = [];
+      }
+      $this->pad[$func][] = $node->getAttribute('startLine') ?? '?';
     }
   }
 
