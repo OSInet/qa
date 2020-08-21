@@ -120,6 +120,9 @@ class ExternalCode extends QaCheckBase implements QaCheckInterface {
     $external = [];
     $funcs = array_flip(get_defined_functions()['user']);
     foreach ($funcs as $func => $_) {
+      if (isset($this->qam->internalFunctions[$func])) {
+        continue;
+      }
       try {
         $rf = new ReflectionFunction($func);
       }
