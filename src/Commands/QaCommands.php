@@ -4,11 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\qa\Commands;
 
+use Drupal;
 use Drupal\qa\Controller\WorkflowsReportController;
 use Drupal\qa\Plugin\QaCheck\Cache\Sizes;
 use Drupal\qa\Plugin\QaCheck\Dependencies\Undeclared;
 use Drupal\qa\Plugin\QaCheck\References\Integrity;
 use Drupal\qa\Plugin\QaCheck\References\TaxonomyIndex;
+use Drupal\qa\Plugin\QaCheck\Sql\ChangesDetector;
 use Drupal\qa\Plugin\QaCheck\System\ExternalCode;
 use Drupal\qa\Plugin\QaCheck\System\UnusedExtensions;
 use Drupal\qa\Plugin\QaCheckManager;
@@ -55,7 +57,7 @@ class QaCommands extends DrushCommands {
    * @aliases cmt,como-table
    */
   public function table() {
-    $table = ContentModerationGrid::create(\Drupal::getContainer());
+    $table = ContentModerationGrid::create(Drupal::getContainer());
     $table->report();
   }
 
@@ -69,7 +71,7 @@ class QaCommands extends DrushCommands {
    * @aliases cmg,como-graphviz
    */
   public function graphviz(string $workflow = '') {
-    $graph = ContentModerationGraph::create(\Drupal::getContainer());
+    $graph = ContentModerationGraph::create(Drupal::getContainer());
     echo $graph->report();
   }
 
@@ -80,7 +82,7 @@ class QaCommands extends DrushCommands {
    * @aliases qawl,qa-workflows-list
    */
   public function workflowsList() {
-    $listBuilder = WorkflowsReportController::create(\Drupal::getContainer());
+    $listBuilder = WorkflowsReportController::create(Drupal::getContainer());
     $list = $listBuilder->getWorkflowSummary(
       $listBuilder->storage->loadMultiple()
     );
@@ -95,7 +97,7 @@ class QaCommands extends DrushCommands {
    */
   public function dependencies() {
     /** @var \Drupal\qa\Dependencies $qaDep */
-    $qaDep = \Drupal::service('qa.dependencies');
+    $qaDep = Drupal::service('qa.dependencies');
     $g = $qaDep->build();
     echo $g->build();
   }
@@ -135,6 +137,17 @@ class QaCommands extends DrushCommands {
    */
   public function cacheSizes() {
     $this->runPlugin(Sizes::NAME);
+  }
+
+  /**
+   * Show changes between two databases.
+   *
+   * @command qa:sql:changes
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  public function sqlChanges() {
+    $this->runPlugin(ChangesDetector::NAME);
   }
 
   /**

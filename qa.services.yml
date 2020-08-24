@@ -15,3 +15,13 @@ services:
       - '@extension.list.module'
       - '@extension.list.theme'
       - '@logger.channel.qa'
+
+  database.qa.left:
+    class: Drupal\Core\Database\Connection
+    factory: Drupal\Core\Database\Database::getConnection
+    arguments: [default,left]
+
+  database.qa.right:
+    class: Drupal\Core\Database\Connection
+    factory: Drupal\Core\Database\Database::getConnection
+    arguments: [default,right]
