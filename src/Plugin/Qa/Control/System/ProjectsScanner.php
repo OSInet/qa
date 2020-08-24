@@ -48,7 +48,12 @@ class ProjectsScanner {
   public static function create() {
   }
 
-  public function scan(bool $onlyUnused = FALSE): array {
+  /**
+   * @param bool $onlyUnused
+   *
+   * @return array
+   */
+  public function scan($onlyUnused = FALSE): array {
     if (empty($this->projects)) {
       $this->projects = static::loadList();
     }

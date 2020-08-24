@@ -35,6 +35,10 @@ function qa_drush_command() {
     'aliases' => ['qavar'],
   ];
 
+  $items['field-purge'] = [
+    'aliases' => ['qafp'],
+  ];
+
   return $items;
 }
 
@@ -108,4 +112,8 @@ function drush_qa_variables() {
   uasort($result['detail'], _qa_drush_compare_variables::class);
 
   echo json_encode($result, JSON_PRETTY_PRINT);
+}
+
+function drush_qa_field_purge($count = 100) {
+  field_purge_batch($count);
 }

@@ -33,7 +33,8 @@ function qa_dependencies() {
     ? '_graphviz_create_filepath'
     : '_qa_graphviz_create_filepath';
 
-  require_once($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'));
+  // require_once($function(variable_get('graphviz_filter_pear_path', ''), 'Image/GraphViz.php'));
+  require_once 'sites/all/libraries/Image/GraphViz.php';
 
   $font = array('fontsize' => 10);
   $G = new Image_Graphviz(TRUE);
