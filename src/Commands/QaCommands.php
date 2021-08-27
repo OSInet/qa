@@ -108,9 +108,12 @@ class QaCommands extends DrushCommands {
    * @param string $name
    *   The plugin name.
    *
+   * @param int $inline
+   *   The depth at which Yaml serialization turns to inline.
+   *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function runPlugin(string $name): void {
+  public function runPlugin(string $name, int $inline = 6): void {
     $check = $this->qam->createInstance($name);
     $pass = $check->run();
     $res = [
@@ -125,7 +128,7 @@ class QaCommands extends DrushCommands {
         'data' => $result->data,
       ];
     }
-    $this->output->writeln(Yaml::dump($res, 6, 2));
+    $this->output->writeln(Yaml::dump($res, $inline, 2));
   }
 
   /**
@@ -147,7 +150,7 @@ class QaCommands extends DrushCommands {
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   public function sqlChanges() {
-    $this->runPlugin(ChangesDetector::NAME);
+    $this->runPlugin(ChangesDetector::NAME, 5);
   }
 
   /**

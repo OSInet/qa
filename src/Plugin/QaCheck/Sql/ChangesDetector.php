@@ -11,6 +11,7 @@ use Drupal\qa\Result;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\inline;
 
 /**
  * Class ChangeDetector finds changes between two databases.
@@ -171,17 +172,18 @@ class ChangesDetector extends QaCheckBase {
    *
    * @return bool
    *
-   * @unsafe possible SQL injection: only use on safe $name, $pk, and $key values.
+   * @unsafe possible SQL injection: only use on safe $name, $pk, and $key
+   *   values.
    */
   protected function compareRow(string $name, array $pk, array $key): bool {
-    $sql = "SELECT * FROM `$name` WHERE ";
-    $crit = [];
+    $lq = $this->left->select($name, 'x')->fields('x');
+    $rq = $this->right->select($name, 'x')->fields('x');
     foreach (array_combine($pk, $key) as $k => $v) {
-      $crit[] = "$k = '$v'";
+      $lq->condition($k, $v);
+      $rq->condition($k, $v);
     };
-    $sql .= join(' AND ', $crit);
-    $left = serialize($this->left->query($sql)->fetch());
-    $right = serialize($this->right->query($sql)->fetch());
+    $left = serialize($lq->execute()->fetch());
+    $right = serialize($rq->execute()->fetch());
     return $left !== $right;
   }
 
@@ -190,13 +192,6 @@ class ChangesDetector extends QaCheckBase {
     $ret = [];
     foreach ($this->both as $name) {
       $this->logger->warning("Checking @name", ['@name' => $name]);
-      if (!in_array($name, [
-        'menu_links',
-        'menu_router',
-        'node',
-      ])) {
-        continue;
-      }
       // Both tables have the same schema, only get it once.
       $pk = self::getPK($this->left, $name);
       if (empty($pk)) {
@@ -204,56 +199,41 @@ class ChangesDetector extends QaCheckBase {
         continue;
       }
 
-      $lKeys = [];
-      $q = $this->left
-        ->select($name, 'qa')
-        ->fields('qa', $pk);
-      foreach ($pk as $pkCol) {
-        $q = $q->orderBy($pkCol);
-      }
-      $lKeysCursor = $q->orderBy(...$pk);
-      foreach ($lKeysCursor as $row) {
-        $key = [];
-        foreach ($pk as $index => $col) {
-          $key[] = $row->$col;
-        }
-        $lKeys[] = serialize($key);
-      }
+      $lKeys = $this->keyValues($this->left, $name, $pk);
+      $rKeys = $this->keyValues($this->right, $name, $pk);
 
-      $rKeys = [];
-      $q = $this->right
-        ->select($name, 'qa')
-        ->fields('qa', $pk);
-      foreach ($pk as $pkCol) {
-        $q = $q->orderBy($pkCol);
-      }
-      $rKeysCursor = $q->orderBy(...$pk)
-        ->execute();
-      foreach ($rKeysCursor as $row) {
-        $key = [];
-        foreach ($pk as $index => $col) {
-          $key[] = $row->$col;
-        }
-        $rKeys[] = serialize($key);
-      }
+      $numericize = function (string $s) {
+        return is_numeric($s) ? (int) $s : $s;
+      };
+
       $onlyLeft = array_values(array_diff($lKeys, $rKeys));
       if (!empty($onlyLeft)) {
-        $ret['onlyLeft'][$name] = array_map('unserialize', $onlyLeft);
+        $ret['onlyLeft'][$name] = array_map($numericize, $onlyLeft);
       }
       $onlyRight = array_values(array_diff($rKeys, $lKeys));
       if (!empty($onlyRight)) {
-        $ret['onlyRight'][$name] = array_map('unserialize', $onlyRight);
+        $ret['onlyRight'][$name] = array_map($numericize, $onlyRight);
       }
       $both = array_values(array_intersect($lKeys, $rKeys));
 
-      foreach ($both as $index => $key) {
-        $arKey = unserialize($key);
+      $i = 1;
+      $changed = [];
+      foreach ($both as $key) {
+        $arKey = explode('|', $key);
         if ($this->compareRow($name, $pk, $arKey)) {
-          $ret['changed'][$name][$index] = $arKey;
+          $changed[] = is_numeric($key) ? (int) $key : $key;
         }
-        if ($index % 5000 === 0) {
-          $this->logger->warning("@index rows compared", ['@index' => $index]);
+        if ($i % 5000 === 0) {
+          $this->logger->warning("@i rows compared. RAM usage: @usage MB", [
+            '@i' => $i,
+            '@usage' => memory_get_usage(TRUE) / 1024 / 1024,
+          ]);
         }
+        $i++;
+      }
+      if (!empty($changed)) {
+        $count = count($changed);
+        $ret['changed']["${name} (${count})"] = $changed;
       }
     }
 
@@ -270,6 +250,30 @@ class ChangesDetector extends QaCheckBase {
     $pass->record($this->compareContent());
     $pass->life->end();
     return $pass;
+  }
+
+  /**
+   * @param \Drupal\Core\Database\Connection $db
+   * @param $name
+   * @param array $pk
+   *
+   * @return array
+   */
+  protected static function keyValues(Connection $db, $name, array $pk): array {
+    $keys = [];
+    $q = $db->select($name, 'qa')->fields('qa', $pk);
+    foreach ($pk as $pkCol) {
+      $q = $q->orderBy($pkCol);
+    }
+    $cursor = $q->execute();
+    foreach ($cursor as $row) {
+      $key = [];
+      foreach ($pk as $index => $col) {
+        $key[] = $row->$col;
+      }
+      $keys[] = implode('|', $key);
+    }
+    return $keys;
   }
 
 }
