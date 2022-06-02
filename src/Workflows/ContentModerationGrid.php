@@ -134,7 +134,7 @@ class ContentModerationGrid implements ContainerInjectionInterface {
       $message = $this->formatPlural($count, "One repeated transition label: @info", "@count repeated transition labels: @info", [
         "@info" => implode(", ", array_keys($duplicates))
       ]);
-      drush_log($message, 'warning');
+      drush_print($message, 'warning');
     }
   }
 

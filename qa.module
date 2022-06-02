@@ -24,6 +24,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\qa\BaseControl;
+use Drupal\qa\BasePackage;
 use Drupal\qa\Exportable;
 use Drupal\qa\Variable;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -128,8 +129,10 @@ function qa_report_results() {
  */
 function qa_report_form($form, $form_state) {
   $form = [];
-  $base = drupal_get_path('module', 'qa');
-  $packages = Exportable::getClasses($base, 'Drupal\qa\BasePackage');
+  /** @var \Drupal\Core\Extension\ExtensionPathResolver $epr */
+  $epr = \Drupal::service('extension.path.resolver');
+  $base = $epr->getPath('module', 'qa');
+  $packages = Exportable::getClasses($base, BasePackage::class);
   ksort($packages);
   foreach ($packages as $package_name => $package) {
     $collapsed = TRUE;

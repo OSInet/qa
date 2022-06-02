@@ -102,7 +102,7 @@ class ProjectsReportController extends ControllerBase {
    *
    * @deprecated
    */
-  private final function qa_report_project(Variable $variable = NULL) {
+  private function qa_report_project(Variable $variable = NULL) {
     $c = cache_get('views_data:fr', 'cache_views');
     $ret = '<pre>' . json_encode($c, JSON_PRETTY_PRINT) . '</pre>';
     return $ret;
@@ -127,7 +127,7 @@ class ProjectsReportController extends ControllerBase {
    *
    * @deprecated
    */
-  private final function qa_report_projects() {
+  private function qa_report_projects() {
     $ret = '<h3>Projects</h3>';
     drupal_static_reset('update_get_projects');
     $GLOBALS['conf']['update_check_disabled'] = TRUE;
