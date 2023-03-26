@@ -4,6 +4,6 @@ dependencies:
 description: 'Quality Assurance framework and built-in controls'
 name: 'QA'
 package: 'OSInet'
-php: 7.3
+php: 8
 project: 'OSInet QA'
 type: 'module'
